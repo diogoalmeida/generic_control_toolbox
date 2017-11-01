@@ -1,4 +1,4 @@
-Generic control toolbox
+Generic control toolbox  [![Build Status](https://travis-ci.org/diogoalmeida/generic_control_toolbox.svg?branch=master)](https://travis-ci.org/diogoalmeida/generic_control_toolbox)
 ========
 This ROS package defines libraries that are generic to the control algorithms
 used in my research, in an attempt to maximize code re-usability.
