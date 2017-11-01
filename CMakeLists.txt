@@ -34,7 +34,7 @@ link_directories(${catkin_LIBRARY_DIRS})
 catkin_package(
   CATKIN_DEPENDS roscpp geometry_msgs cmake_modules eigen_conversions kdl_parser sensor_msgs tf_conversions tf
   INCLUDE_DIRS include
-  LIBRARIES matrix_parser kdl_manager wrench_manager
+  LIBRARIES matrix_parser kdl_manager wrench_manager controller_template
 )
 
 include_directories(
@@ -53,3 +53,7 @@ add_dependencies(kdl_manager ${catkin_EXPORTED_TARGETS})
 add_library(wrench_manager src/wrench_manager.cpp src/manager_base.cpp)
 target_link_libraries(wrench_manager ${catkin_LIBRARIES})
 add_dependencies(wrench_manager ${catkin_EXPORTED_TARGETS})
+
+add_library(controller_template src/controller_template.cpp)
+target_link_libraries(controller_template ${catkin_LIBRARIES})
+add_dependencies(controller_template ${catkin_EXPORTED_TARGETS})
