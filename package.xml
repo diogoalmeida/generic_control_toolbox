@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>generic_control_toolbox</name>
+  <version>0.1.0</version>
+  <description>Some libraries used in my control projects</description>
+  <maintainer email="diogoa@kth.se">diogo</maintainer>
+  <license>KTH</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>roscpp</depend>
+  <depend>geometry_msgs</depend>
+  <depend>cmake_modules</depend>
+  <depend>eigen_conversions</depend>
+  <depend>kdl_parser</depend>
+  <depend>sensor_msgs</depend>
+  <depend>tf_conversions</depend>
+  <depend>tf</depend>
+</package>
