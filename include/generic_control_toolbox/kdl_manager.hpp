@@ -46,7 +46,7 @@ namespace generic_control_toolbox
       @param out The resulting eef pose.
       @return False in case something goes wrong, true otherwise.
     **/
-    bool getEefPose(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out);
+    bool getEefPose(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const;
 
     /**
       Returns the twist of the requested end-effector, given a joint state.
@@ -56,7 +56,7 @@ namespace generic_control_toolbox
       @param out The resulting eef twist.
       @return False in case something goes wrong, true otherwise.
     **/
-    bool getEefTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::FrameVel &out);
+    bool getEefTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::FrameVel &out) const;
 
     /**
       Returns the inverse kinematics of the requested end-effector, given a desired pose.
@@ -67,7 +67,7 @@ namespace generic_control_toolbox
       @param out Joint state for the desired pose.
       @return False in case something goes wrong, true otherwise.
     **/
-    bool getPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out);
+    bool getPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out) const;
 
     /**
       Returns the inverse differential kinematics of the requested end-effector, given a desired twist.
@@ -78,7 +78,7 @@ namespace generic_control_toolbox
       @param out Joint state for the desired twist.
       @return False in case something goes wrong, true otherwise.
     **/
-    bool getVelIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Twist &in, KDL::JntArray &out);
+    bool getVelIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Twist &in, KDL::JntArray &out) const;
 
     /**
       Returns the jacobian the requested end-effector's chain.
@@ -88,7 +88,7 @@ namespace generic_control_toolbox
       @param out End-effector's jacobian.
       @return False in case something goes wrong, true otherwise.
     **/
-    bool getJacobian(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Jacobian &out);
+    bool getJacobian(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Jacobian &out) const;
 
   private:
     std::vector<std::shared_ptr<KDL::ChainIkSolverVel_wdls> > ikvel_;
@@ -114,7 +114,7 @@ namespace generic_control_toolbox
       @param velocities The joint velocities of the kinematic chain.
       @return True if the full joint chain was found in the current state, false otherwise.
     **/
-    bool getChainJointState(const sensor_msgs::JointState &current_state, const KDL::Chain &chain, KDL::JntArray &positions, KDL::JntArrayVel &velocities);
+    bool getChainJointState(const sensor_msgs::JointState &current_state, const KDL::Chain &chain, KDL::JntArray &positions, KDL::JntArrayVel &velocities) const;
 
     /**
       Check if a chain has the given joint_name.
@@ -123,7 +123,7 @@ namespace generic_control_toolbox
       @param joint_name The joint name we wish to check.
       @return True if the joint was found in the kinematic chain, false otherwise.
     **/
-    bool hasJoint(const KDL::Chain &chain, const std::string &joint_name);
+    bool hasJoint(const KDL::Chain &chain, const std::string &joint_name) const;
   };
 }
 #endif

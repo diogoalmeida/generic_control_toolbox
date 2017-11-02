@@ -25,7 +25,7 @@ namespace generic_control_toolbox
       @throw logic_error in case vals does not have square dimensions.
       @return True for success, False if parameter is not available.
     **/
-    bool parseMatrixData(Eigen::MatrixXd &M, const std::string param_name, const ros::NodeHandle &n);
+    bool parseMatrixData(Eigen::MatrixXd &M, const std::string param_name, const ros::NodeHandle &n) const;
 
     /**
       Computed the skew-symmetric matrix of a 3-dimensional vector.
@@ -33,7 +33,7 @@ namespace generic_control_toolbox
       @param v The 3-dimensional vector
       @return The skew-symmetric matrix
     **/
-    Eigen::Matrix3d computeSkewSymmetric(const Eigen::Vector3d &v);
+    Eigen::Matrix3d computeSkewSymmetric(const Eigen::Vector3d &v) const;
 
   private:
     /**
@@ -43,7 +43,7 @@ namespace generic_control_toolbox
       @param vals A vector with the values to fill in
       @throw logic_error in case vals does not have square dimensions.
     **/
-    void initializeEigenMatrix(Eigen::MatrixXd &M, const std::vector<double> &vals);
+    void initializeEigenMatrix(Eigen::MatrixXd &M, const std::vector<double> &vals) const;
   };
 }
 

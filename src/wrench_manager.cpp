@@ -64,7 +64,7 @@ namespace generic_control_toolbox
     return true;
   }
 
-  bool WrenchManager::wrenchAtGrippingPoint(const std::string &end_effector, Eigen::Matrix<double, 6, 1> &wrench)
+  bool WrenchManager::wrenchAtGrippingPoint(const std::string &end_effector, Eigen::Matrix<double, 6, 1> &wrench) const
   {
     int arm;
     if (!getArmIndex(end_effector, arm))

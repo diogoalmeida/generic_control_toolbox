@@ -41,7 +41,7 @@ namespace generic_control_toolbox
       @wrench The wrench at the gripping point.
       @return false in case of error, true otherwise.
     **/
-    bool wrenchAtGrippingPoint(const std::string &end_effector, Eigen::Matrix<double, 6, 1> &wrench);
+    bool wrenchAtGrippingPoint(const std::string &end_effector, Eigen::Matrix<double, 6, 1> &wrench) const;
 
   private:
     int max_tf_attempts_;

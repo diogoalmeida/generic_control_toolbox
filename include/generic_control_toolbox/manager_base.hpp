@@ -24,7 +24,7 @@ namespace generic_control_toolbox
       @param arm The arm index
       @return true if the arm is found, false otherwise.
     **/
-    bool getArmIndex(const std::string &eef, int &arm);
+    bool getArmIndex(const std::string &eef, int &arm) const;
   };
 }
 

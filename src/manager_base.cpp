@@ -5,7 +5,7 @@ namespace generic_control_toolbox
   ManagerBase::ManagerBase(){}
   ManagerBase::~ManagerBase(){}
 
-  bool ManagerBase::getArmIndex(const std::string &eef, int &arm)
+  bool ManagerBase::getArmIndex(const std::string &eef, int &arm) const
   {
     arm = -1;
 

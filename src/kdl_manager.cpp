@@ -65,7 +65,7 @@ namespace generic_control_toolbox
       return true;
     }
 
-    bool KDLManager::getEefPose(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out)
+    bool KDLManager::getEefPose(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const
     {
       int arm;
 
@@ -85,7 +85,7 @@ namespace generic_control_toolbox
       return true;
     }
 
-    bool KDLManager::getEefTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::FrameVel &out)
+    bool KDLManager::getEefTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::FrameVel &out) const
     {
       int arm;
 
@@ -105,7 +105,7 @@ namespace generic_control_toolbox
       return true;
     }
 
-    bool KDLManager::getPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out)
+    bool KDLManager::getPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out) const
     {
       int arm;
 
@@ -125,7 +125,7 @@ namespace generic_control_toolbox
       return true;
     }
 
-    bool KDLManager::getVelIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Twist &in, KDL::JntArray &out)
+    bool KDLManager::getVelIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Twist &in, KDL::JntArray &out) const
     {
       int arm;
 
@@ -145,7 +145,7 @@ namespace generic_control_toolbox
       return true;
     }
 
-    bool KDLManager::getJacobian(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Jacobian &out)
+    bool KDLManager::getJacobian(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Jacobian &out) const
     {
       int arm;
 
@@ -165,7 +165,7 @@ namespace generic_control_toolbox
       return true;
     }
 
-    bool KDLManager::getChainJointState(const sensor_msgs::JointState &current_state, const KDL::Chain &chain, KDL::JntArray &positions, KDL::JntArrayVel &velocities)
+    bool KDLManager::getChainJointState(const sensor_msgs::JointState &current_state, const KDL::Chain &chain, KDL::JntArray &positions, KDL::JntArrayVel &velocities) const
     {
       unsigned int processed_joints = 0;
       for (unsigned long i = 0; i < current_state.name.size(); i++)
@@ -188,7 +188,7 @@ namespace generic_control_toolbox
       return true;
     }
 
-    bool KDLManager::hasJoint(const KDL::Chain &chain, const std::string &joint_name)
+    bool KDLManager::hasJoint(const KDL::Chain &chain, const std::string &joint_name) const
     {
       for (unsigned int i = 0; i < chain.getNrOfSegments(); i++)
       {
