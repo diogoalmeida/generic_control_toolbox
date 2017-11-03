@@ -10,6 +10,8 @@
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainfksolvervel_recursive.hpp>
 #include <sensor_msgs/JointState.h>
+#include <geometry_msgs/WrenchStamped.h>
+#include <tf/transform_listener.h>
 #include <kdl_parser/kdl_parser.hpp>
 #include <kdl/kdl.hpp>
 #include <urdf/model.h>
@@ -39,14 +41,25 @@ namespace generic_control_toolbox
     bool initializeArm(const std::string &end_effector_link);
 
     /**
-      Returns the pose of the requested end-effector, given a joint state.
+      Queries TF for the rigid transform between the end-effector link frame and
+      the gripping point frame and stores it as a KDL Frame.
 
-      @param end_effector_link The name of the requested end-effector.
-      @param state The current robot joint state.
-      @param out The resulting eef pose.
-      @return False in case something goes wrong, true otherwise.
+      @param end_effector_link The end-effector link name.
+      @param gripping_point_frame TF name of the gripping point frame.
+      @return False if transform is not found or something else goes wrong, true otherwise.
     **/
-    bool getEefPose(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const;
+    bool setGrippingPoint(const std::string &end_effector_link, const std::string &gripping_point_frame);
+
+    /**
+      Returns the gripping point of the chosen arm.
+      By default this is set to be the end-effector pose.
+
+      @param end_effector_link The arm's end-effector name.
+      @param state The robot joint state.
+      @param out The resulting gripping point frame.
+      @return False if something goes wrong, true otherwise.
+    **/
+    bool getGrippingPoint(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const;
 
     /**
       Returns the twist of the requested end-effector, given a joint state.
@@ -96,12 +109,24 @@ namespace generic_control_toolbox
     std::vector<std::shared_ptr<KDL::ChainFkSolverPos_recursive> > fkpos_;
     std::vector<std::shared_ptr<KDL::ChainFkSolverVel_recursive> > fkvel_;
     std::vector<std::shared_ptr<KDL::ChainJntToJacSolver> > jac_solver_;
+    std::vector<KDL::Frame> eef_to_gripping_point_;
     std::vector<KDL::Chain> chain_;
 
     urdf::Model model_;
+    tf::TransformListener listener_;
     std::vector<std::vector<std::string> > actuated_joint_names_; // list of actuated joints per arm
     std::string chain_base_link_;
-    double eps_;
+    double eps_, max_tf_attempts_;
+
+    /**
+      Returns the pose of the requested end-effector, given a joint state.
+
+      @param end_effector_link The name of the requested end-effector.
+      @param state The current robot joint state.
+      @param out The resulting eef pose.
+      @return False in case something goes wrong, true otherwise.
+    **/
+    bool getEefPose(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const;
 
     /**
       Fills in the joint arrays with the state of a given kinematic chain.

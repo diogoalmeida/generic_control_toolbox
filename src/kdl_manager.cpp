@@ -10,6 +10,7 @@ namespace generic_control_toolbox
       }
 
       eps_ = 0.001; // TODO: Make parameter
+      max_tf_attempts_ = 5;
     }
 
     KDLManager::~KDLManager() {}
@@ -32,9 +33,6 @@ namespace generic_control_toolbox
         ROS_ERROR("Failed to find chain <%s, %s> in the kinematic tree", chain_base_link_.c_str(), end_effector_link.c_str());
         return false;
       }
-      // joint_positions.resize(chain.getNrOfJoints());
-      // joint_velocities.q.resize(chain.getNrOfJoints());
-      // joint_velocities.qdot.resize(chain.getNrOfJoints());
 
       // Ready to accept the end-effector as valid
       end_effector_.push_back(end_effector_link);
@@ -60,8 +58,76 @@ namespace generic_control_toolbox
       fkpos_.push_back(std::shared_ptr<KDL::ChainFkSolverPos_recursive>(new KDL::ChainFkSolverPos_recursive(chain)));
       fkvel_.push_back(std::shared_ptr<KDL::ChainFkSolverVel_recursive>(new KDL::ChainFkSolverVel_recursive(chain)));
       ikpos_.push_back(std::shared_ptr<KDL::ChainIkSolverPos_LMA>(new KDL::ChainIkSolverPos_LMA(chain)));
+      eef_to_gripping_point_.push_back(KDL::Frame::Identity()); // Initialize a neutral transform.
       jac_solver_.push_back(std::shared_ptr<KDL::ChainJntToJacSolver>(new KDL::ChainJntToJacSolver(chain)));
 
+      return true;
+    }
+
+    bool KDLManager::setGrippingPoint(const std::string &end_effector_link, const std::string &gripping_point_frame)
+    {
+      int arm;
+
+      if (!getArmIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      // get rigid transform between end-effector and arm gripping point
+      geometry_msgs::PoseStamped eef_to_gripping_point;
+      eef_to_gripping_point.header.frame_id = end_effector_link;
+      eef_to_gripping_point.header.stamp = ros::Time(0);
+      eef_to_gripping_point.pose.position.x = 0;
+      eef_to_gripping_point.pose.position.y = 0;
+      eef_to_gripping_point.pose.position.z = 0;
+      eef_to_gripping_point.pose.orientation.x = 0;
+      eef_to_gripping_point.pose.orientation.y = 0;
+      eef_to_gripping_point.pose.orientation.z = 0;
+      eef_to_gripping_point.pose.orientation.w = 1;
+
+      int attempts;
+      for (attempts = 0; attempts < max_tf_attempts_; attempts++)
+      {
+        try
+        {
+          listener_.transformPose(gripping_point_frame, eef_to_gripping_point, eef_to_gripping_point);
+          break;
+        }
+        catch (tf::TransformException ex)
+        {
+          ROS_WARN("TF exception in kdl manager: %s", ex.what());
+        }
+        sleep(0.1);
+      }
+
+      if (attempts >= max_tf_attempts_)
+      {
+        ROS_ERROR("KDL manager could not find the transform between the end-effector frame %s and gripping point %s", end_effector_link.c_str(), gripping_point_frame.c_str());
+        return false;
+      }
+
+      KDL::Frame eef_to_gripping_point_kdl;
+      tf::poseMsgToKDL(eef_to_gripping_point.pose, eef_to_gripping_point_kdl);
+      eef_to_gripping_point_[arm] = eef_to_gripping_point_kdl;
+      return true;
+    }
+
+    bool KDLManager::getGrippingPoint(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const
+    {
+      int arm;
+
+      if (!getArmIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      KDL::Frame eef_pose;
+      if (!getEefPose(end_effector_link, state, eef_pose))
+      {
+        return false;
+      }
+
+      out = eef_to_gripping_point_[arm]*eef_pose;
       return true;
     }
 
