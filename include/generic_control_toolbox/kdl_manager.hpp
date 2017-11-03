@@ -62,14 +62,15 @@ namespace generic_control_toolbox
     bool getGrippingPoint(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const;
 
     /**
-      Returns the twist of the requested end-effector, given a joint state.
+      Returns the twist of the requested end-effector's gripping point.
+      By default this is set to be the end-effector's twist.
 
       @param end_effector_link The name of the requested end-effector.
       @param state The current robot joint state.
       @param out The resulting eef twist.
       @return False in case something goes wrong, true otherwise.
     **/
-    bool getEefTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::FrameVel &out) const;
+    bool getGrippingTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Twist &out) const;
 
     /**
       Returns the inverse kinematics of the requested end-effector, given a desired pose.
@@ -127,6 +128,16 @@ namespace generic_control_toolbox
       @return False in case something goes wrong, true otherwise.
     **/
     bool getEefPose(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const;
+
+    /**
+      Returns the twist of the requested end-effector, given a joint state.
+
+      @param end_effector_link The name of the requested end-effector.
+      @param state The current robot joint state.
+      @param out The resulting eef twist.
+      @return False in case something goes wrong, true otherwise.
+    **/
+    bool getEefTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::FrameVel &out) const;
 
     /**
       Fills in the joint arrays with the state of a given kinematic chain.

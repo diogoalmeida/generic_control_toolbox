@@ -127,7 +127,26 @@ namespace generic_control_toolbox
         return false;
       }
 
-      out = eef_to_gripping_point_[arm]*eef_pose;
+      out = eef_pose*eef_to_gripping_point_[arm];
+      return true;
+    }
+
+    bool KDLManager::getGrippingTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Twist &out) const
+    {
+      int arm;
+
+      if (!getArmIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      KDL::FrameVel eef_twist;
+      if (!getEefTwist(end_effector_link, state, eef_twist))
+      {
+        return false;
+      }
+
+      out = eef_to_gripping_point_[arm].Inverse()*eef_twist.GetTwist();
       return true;
     }
 
