@@ -112,6 +112,89 @@ namespace generic_control_toolbox
       return true;
     }
 
+    bool KDLManager::getJointState(const std::string &end_effector_link, const Eigen::VectorXd &qdot, sensor_msgs::JointState &state) const
+    {
+      int arm;
+
+      if (!getArmIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      if (chain_[arm].getNrOfJoints() != qdot.rows())
+      {
+        ROS_ERROR("Joint chain for eef %s has a different number of joints than the provided", end_effector_link.c_str());
+        return false;
+      }
+
+      Eigen::VectorXd q(chain_[arm].getNrOfJoints());
+      int joint_index = 0;
+
+      for (unsigned long i = 0; i < state.name.size(); i++)
+      {
+        if (hasJoint(chain_[arm], state.name[i]))
+        {
+          q[joint_index] = state.position[i];
+          joint_index++;
+        }
+
+        if (joint_index == chain_[arm].getNrOfJoints())
+        {
+          break;
+        }
+      }
+
+      if (joint_index != chain_[arm].getNrOfJoints())
+      {
+        ROS_ERROR("Provided joint state does not have all of the required chain joints");
+        return false;
+      }
+
+      return getJointState(end_effector_link, q, qdot, state);
+    }
+
+    bool KDLManager::getJointState(const std::string &end_effector_link, const Eigen::VectorXd &q, const Eigen::VectorXd &qdot, sensor_msgs::JointState &state) const
+    {
+      if (q.rows() != qdot.rows())
+      {
+        ROS_ERROR("Given joint state with a different number of joint positions and velocities");
+        return false;
+      }
+
+      int arm;
+
+      if (!getArmIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      if (chain_[arm].getNrOfJoints() != qdot.rows())
+      {
+        ROS_ERROR("Joint chain for eef %s has a different number of joints than the provided", end_effector_link.c_str());
+        return false;
+      }
+
+      int joint_index = 0;
+
+      for (unsigned long i = 0; i < state.name.size(); i++)
+      {
+        if (hasJoint(chain_[arm], state.name[i]))
+        {
+          state.position[i] = q[joint_index];
+          state.velocity[i] = qdot[joint_index];
+          joint_index++;
+        }
+      }
+
+      if (joint_index != chain_[arm].getNrOfJoints() - 1)
+      {
+        ROS_ERROR("Could not find all the joints in the provided joint state message");
+        return false;
+      }
+
+      return true;
+    }
+
     bool KDLManager::getGrippingPoint(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const
     {
       int arm;

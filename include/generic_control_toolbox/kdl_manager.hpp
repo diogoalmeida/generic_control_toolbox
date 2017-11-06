@@ -51,6 +51,30 @@ namespace generic_control_toolbox
     bool setGrippingPoint(const std::string &end_effector_link, const std::string &gripping_point_frame);
 
     /**
+      Fills the joint state message given only joint velocities. Joint positions are
+      taken from the joint state message.
+
+      @param end_effector_link The chain's end_effector.
+      @param q The chain's joint posisitions.
+      @param qdot The chain's joint velocities.
+      @param state The generated joint state message.
+      @return False if something goes wrong.
+    **/
+    bool getJointState(const std::string &end_effector_link, const Eigen::VectorXd &qdot, sensor_msgs::JointState &state) const;
+
+    /**
+      Fills the joint state message appropriately given the joint
+      positions and velocities of the selected end-effector's joint chain.
+
+      @param end_effector_link The chain's end_effector.
+      @param q The chain's joint posisitions.
+      @param qdot The chain's joint velocities.
+      @param state The generated joint state message.
+      @return False if something goes wrong.
+    **/
+    bool getJointState(const std::string &end_effector_link, const Eigen::VectorXd &q, const Eigen::VectorXd &qdot, sensor_msgs::JointState &state) const;
+
+    /**
       Returns the gripping point of the chosen arm.
       By default this is set to be the end-effector pose.
 
