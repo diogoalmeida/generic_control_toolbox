@@ -96,8 +96,8 @@ namespace generic_control_toolbox
         catch (tf::TransformException ex)
         {
           ROS_WARN("TF exception in kdl manager: %s", ex.what());
+          ros::Duration(0.1).sleep();
         }
-        sleep(0.1);
       }
 
       if (attempts >= max_tf_attempts_)
