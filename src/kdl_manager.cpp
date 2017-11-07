@@ -186,7 +186,7 @@ namespace generic_control_toolbox
         }
       }
 
-      if (joint_index != chain_[arm].getNrOfJoints() - 1)
+      if (joint_index != chain_[arm].getNrOfJoints())
       {
         ROS_ERROR("Could not find all the joints in the provided joint state message");
         return false;
@@ -242,8 +242,8 @@ namespace generic_control_toolbox
         return false;
       }
 
-      KDL::JntArray positions;
-      KDL::JntArrayVel velocities;
+      KDL::JntArray positions(chain_[arm].getNrOfJoints());
+      KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
       if (!getChainJointState(state, chain_[arm], positions, velocities))
       {
         return false;
@@ -262,8 +262,8 @@ namespace generic_control_toolbox
         return false;
       }
 
-      KDL::JntArray positions;
-      KDL::JntArrayVel velocities;
+      KDL::JntArray positions(chain_[arm].getNrOfJoints());
+      KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
       if (!getChainJointState(state, chain_[arm], positions, velocities))
       {
         return false;
@@ -282,8 +282,8 @@ namespace generic_control_toolbox
         return false;
       }
 
-      KDL::JntArray positions;
-      KDL::JntArrayVel velocities;
+      KDL::JntArray positions(chain_[arm].getNrOfJoints());
+      KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
       if (!getChainJointState(state, chain_[arm], positions, velocities))
       {
         return false;
@@ -302,8 +302,8 @@ namespace generic_control_toolbox
         return false;
       }
 
-      KDL::JntArray positions;
-      KDL::JntArrayVel velocities;
+      KDL::JntArray positions(chain_[arm].getNrOfJoints());
+      KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
       if (!getChainJointState(state, chain_[arm], positions, velocities))
       {
         return false;
@@ -322,8 +322,8 @@ namespace generic_control_toolbox
         return false;
       }
 
-      KDL::JntArray positions;
-      KDL::JntArrayVel velocities;
+      KDL::JntArray positions(chain_[arm].getNrOfJoints());
+      KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
       if (!getChainJointState(state, chain_[arm], positions, velocities))
       {
         return false;
