@@ -11,6 +11,7 @@ find_package(
 	kdl_parser
 	sensor_msgs
 	tf_conversions
+	realtime_tools
 	tf
 )
 
@@ -34,7 +35,7 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp geometry_msgs cmake_modules eigen_conversions kdl_parser sensor_msgs tf_conversions tf visualization_msgs
+  CATKIN_DEPENDS roscpp geometry_msgs cmake_modules eigen_conversions kdl_parser sensor_msgs tf_conversions tf visualization_msgs realtime_tools
   INCLUDE_DIRS include
   LIBRARIES matrix_parser kdl_manager wrench_manager controller_template marker_manager
 )

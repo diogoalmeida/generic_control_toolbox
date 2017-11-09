@@ -15,5 +15,6 @@
   <depend>kdl_parser</depend>
   <depend>sensor_msgs</depend>
   <depend>tf_conversions</depend>
+  <depend>realtime_tools</depend>
   <depend>tf</depend>
 </package>
