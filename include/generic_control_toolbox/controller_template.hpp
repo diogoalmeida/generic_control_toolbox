@@ -62,6 +62,16 @@ namespace generic_control_toolbox
     **/
     virtual void resetController() = 0;
 
+    /**
+    Return the last controlled joint state. If the controller does not have
+    an active actionlib goal, it will set the references of the joint controller
+    to the last desired position (and null velocity).
+
+    @param current The current joint state.
+    @return The last commanded joint state before the actionlib goal was
+    preempted or completed.
+    **/
+    sensor_msgs::JointState lastState(const sensor_msgs::JointState &current);
   private:
     /**
       Method that manages the starting of the actionlib server of each cartesian
@@ -79,16 +89,6 @@ namespace generic_control_toolbox
     **/
     virtual void preemptCB();
 
-    /**
-      Return the last controlled joint state. If the controller does not have
-      an active actionlib goal, it will set the references of the joint controller
-      to the last desired position (and null velocity).
-
-      @param current The current joint state.
-      @return The last commanded joint state before the actionlib goal was
-      preempted or completed.
-    **/
-    sensor_msgs::JointState lastState(const sensor_msgs::JointState &current);
 
     boost::shared_ptr<actionlib::SimpleActionServer<ActionClass> > action_server_;
     ActionFeedback feedback_;

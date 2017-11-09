@@ -169,12 +169,12 @@ namespace generic_control_toolbox
       the need to process it.
 
       @param current_state The robot joint state.
-      @param chain The target kinematic chain.
+      @param arm The target arm index.
       @param positions The joint positions of the kinematic chain.
       @param velocities The joint velocities of the kinematic chain.
       @return True if the full joint chain was found in the current state, false otherwise.
     **/
-    bool getChainJointState(const sensor_msgs::JointState &current_state, const KDL::Chain &chain, KDL::JntArray &positions, KDL::JntArrayVel &velocities) const;
+    bool getChainJointState(const sensor_msgs::JointState &current_state, int arm, KDL::JntArray &positions, KDL::JntArrayVel &velocities) const;
 
     /**
       Check if a chain has the given joint_name.

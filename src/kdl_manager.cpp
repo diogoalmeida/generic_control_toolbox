@@ -20,7 +20,7 @@ namespace generic_control_toolbox
       int a;
       if(getArmIndex(end_effector_link, a))
       {
-        ROS_ERROR("Tried to initialize arm %s, but it was already initialized", end_effector_link.c_str());
+        ROS_ERROR_STREAM("Tried to initialize arm " << end_effector_link << ", but it was already initialized");
         return false;
       }
 
@@ -30,7 +30,7 @@ namespace generic_control_toolbox
       kdl_parser::treeFromUrdfModel(model_, tree); // convert URDF description of the robot into a KDL tree
       if(!tree.getChain(chain_base_link_, end_effector_link, chain))
       {
-        ROS_ERROR("Failed to find chain <%s, %s> in the kinematic tree", chain_base_link_.c_str(), end_effector_link.c_str());
+        ROS_ERROR_STREAM("Failed to find chain <" << chain_base_link_ << ", " << end_effector_link << "> in the kinematic tree");
         return false;
       }
 
@@ -108,7 +108,7 @@ namespace generic_control_toolbox
 
       KDL::Frame eef_to_gripping_point_kdl;
       tf::poseMsgToKDL(eef_to_gripping_point.pose, eef_to_gripping_point_kdl);
-      eef_to_gripping_point_[arm] = eef_to_gripping_point_kdl;
+      eef_to_gripping_point_[arm] = eef_to_gripping_point_kdl.Inverse();
       return true;
     }
 
@@ -244,7 +244,7 @@ namespace generic_control_toolbox
 
       KDL::JntArray positions(chain_[arm].getNrOfJoints());
       KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
-      if (!getChainJointState(state, chain_[arm], positions, velocities))
+      if (!getChainJointState(state, arm, positions, velocities))
       {
         return false;
       }
@@ -264,7 +264,7 @@ namespace generic_control_toolbox
 
       KDL::JntArray positions(chain_[arm].getNrOfJoints());
       KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
-      if (!getChainJointState(state, chain_[arm], positions, velocities))
+      if (!getChainJointState(state, arm, positions, velocities))
       {
         return false;
       }
@@ -284,7 +284,7 @@ namespace generic_control_toolbox
 
       KDL::JntArray positions(chain_[arm].getNrOfJoints());
       KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
-      if (!getChainJointState(state, chain_[arm], positions, velocities))
+      if (!getChainJointState(state, arm, positions, velocities))
       {
         return false;
       }
@@ -304,7 +304,7 @@ namespace generic_control_toolbox
 
       KDL::JntArray positions(chain_[arm].getNrOfJoints());
       KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
-      if (!getChainJointState(state, chain_[arm], positions, velocities))
+      if (!getChainJointState(state, arm, positions, velocities))
       {
         return false;
       }
@@ -324,7 +324,7 @@ namespace generic_control_toolbox
 
       KDL::JntArray positions(chain_[arm].getNrOfJoints());
       KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
-      if (!getChainJointState(state, chain_[arm], positions, velocities))
+      if (!getChainJointState(state, arm, positions, velocities))
       {
         return false;
       }
@@ -333,21 +333,25 @@ namespace generic_control_toolbox
       return true;
     }
 
-    bool KDLManager::getChainJointState(const sensor_msgs::JointState &current_state, const KDL::Chain &chain, KDL::JntArray &positions, KDL::JntArrayVel &velocities) const
+    bool KDLManager::getChainJointState(const sensor_msgs::JointState &current_state, int arm, KDL::JntArray &positions, KDL::JntArrayVel &velocities) const
     {
       unsigned int processed_joints = 0;
-      for (unsigned long i = 0; i < current_state.name.size(); i++)
+
+      for (unsigned long i = 0; i < actuated_joint_names_[arm].size(); i++)
       {
-        if (hasJoint(chain, current_state.name[i]))
+        for (unsigned long j = 0; j < current_state.name.size(); j++)
         {
-          positions(processed_joints) = current_state.position[i];
-          velocities.q(processed_joints) = current_state.position[i];
-          velocities.qdot(processed_joints) = current_state.velocity[i];
-          processed_joints++;
+          if (actuated_joint_names_[arm][i] == current_state.name[j])
+          {
+            positions(processed_joints) = current_state.position[j];
+            velocities.q(processed_joints) = current_state.position[j];
+            velocities.qdot(processed_joints) = current_state.velocity[j];
+            processed_joints++;
+          }
         }
       }
 
-      if (processed_joints != chain.getNrOfJoints())
+      if (processed_joints != actuated_joint_names_[arm].size())
       {
         ROS_ERROR("Failed to acquire chain joint state");
         return false;
