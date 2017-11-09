@@ -5,6 +5,7 @@ find_package(
   catkin REQUIRED COMPONENTS
   roscpp
   geometry_msgs
+  visualization_msgs
   cmake_modules
   eigen_conversions
 	kdl_parser
@@ -33,7 +34,7 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp geometry_msgs cmake_modules eigen_conversions kdl_parser sensor_msgs tf_conversions tf
+  CATKIN_DEPENDS roscpp geometry_msgs cmake_modules eigen_conversions kdl_parser sensor_msgs tf_conversions tf visualization_msgs
   INCLUDE_DIRS include
   LIBRARIES matrix_parser kdl_manager wrench_manager controller_template marker_manager
 )
