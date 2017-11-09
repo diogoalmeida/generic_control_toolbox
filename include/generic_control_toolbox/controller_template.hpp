@@ -155,6 +155,7 @@ namespace generic_control_toolbox
   {
     action_server_->setPreempted(result_);
     ROS_WARN("%s preempted!", action_name_.c_str());
+    has_state_ = false;
     resetController();
   }
 
