@@ -5,6 +5,7 @@
 #include <eigen_conversions/eigen_msg.h>
 #include <visualization_msgs/Marker.h>
 #include <visualization_msgs/MarkerArray.h>
+#include <realtime_tools/realtime_publisher.h>
 
 namespace generic_control_toolbox
 {
@@ -15,7 +16,7 @@ namespace generic_control_toolbox
   class MarkerManager
   {
   public:
-    MarkerManager();
+    MarkerManager(const ros::NodeHandle &n, const std::string &topic_name);
     ~MarkerManager();
 
     /**
@@ -64,9 +65,15 @@ namespace generic_control_toolbox
       @return False if marker_name is not found or if marker type does not allow to set pose.
     **/
     bool setMarkerPose(const std::string &marker_name, const Eigen::Affine3d &pose);
+
+    /**
+      Publishes the marker array. RT safe.
+    **/
+    void publishMarkers();
   private:
     std::map<std::string, int> marker_map_;
     visualization_msgs::MarkerArray marker_array_;
+    std::unique_ptr<realtime_tools::RealtimePublisher<visualization_msgs::MarkerArray> > marker_pub_;
 
     /**
       Returns the marker id indexed by the marker_name

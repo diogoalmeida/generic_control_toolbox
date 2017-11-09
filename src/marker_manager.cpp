@@ -2,7 +2,11 @@
 
 namespace generic_control_toolbox
 {
-  MarkerManager::MarkerManager(){}
+  MarkerManager::MarkerManager(const ros::NodeHandle &n, const std::string &topic_name)
+  {
+    marker_pub_.reset(new realtime_tools::RealtimePublisher<visualization_msgs::MarkerArray>(n, topic_name, 1));
+  }
+
   MarkerManager::~MarkerManager(){}
 
   bool MarkerManager::addMarker(const std::string &marker_name, const std::string &ns, const std::string &frame_id, MarkerType type)
@@ -37,7 +41,7 @@ namespace generic_control_toolbox
     new_marker.color.r = 1.0;
     new_marker.color.a = 1.0;
 
-    int max_id = 0;
+    int max_id = -1;
     for (auto const &entry : marker_map_)
     {
       if (entry.second > max_id)
@@ -46,9 +50,9 @@ namespace generic_control_toolbox
       }
     }
 
-    new_marker.id = max_id;
+    new_marker.id = max_id + 1;
 
-    marker_map_[marker_name] = max_id;
+    marker_map_[marker_name] = max_id + 1;
     marker_array_.markers.push_back(new_marker);
 
     return true;
@@ -115,6 +119,15 @@ namespace generic_control_toolbox
     return true;
   }
 
+  void MarkerManager::publishMarkers()
+  {
+    if (marker_pub_->trylock())
+    {
+      marker_pub_->msg_ = marker_array_;
+      marker_pub_->unlockAndPublish();
+    }
+  }
+
   bool MarkerManager::getMarkerId(const std::string &marker_name, int &id) const
   {
     for (auto const &it : marker_map_)
@@ -131,7 +144,7 @@ namespace generic_control_toolbox
         }
       }
     }
-    
+
     ROS_ERROR_STREAM("MarkerManager: Marker name " << marker_name << " not found");
     return false;
   }
