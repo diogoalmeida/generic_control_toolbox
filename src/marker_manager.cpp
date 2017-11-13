@@ -2,17 +2,43 @@
 
 namespace generic_control_toolbox
 {
-  MarkerManager::MarkerManager(const ros::NodeHandle &n, const std::string &topic_name)
+  MarkerManager::MarkerManager()
   {
-    marker_pub_.reset(new realtime_tools::RealtimePublisher<visualization_msgs::MarkerArray>(n, topic_name, 1));
+    n_ = ros::NodeHandle("~");
   }
 
   MarkerManager::~MarkerManager(){}
 
-  bool MarkerManager::addMarker(const std::string &marker_name, const std::string &ns, const std::string &frame_id, MarkerType type)
+  bool MarkerManager::addMarkerGroup(const std::string &group_key, const std::string &topic_name)
   {
-    int id;
-    if (getMarkerId(marker_name, id))
+    int group = -1;
+
+    if (getIndex(group_key, group))
+    {
+      ROS_ERROR_STREAM("MarkerManager: Tried to add already existing group " << group_key);
+      return false;
+    }
+
+    manager_index_.push_back(group_key);
+    std::shared_ptr<realtime_tools::RealtimePublisher<visualization_msgs::MarkerArray> > rt_pub(new realtime_tools::RealtimePublisher<visualization_msgs::MarkerArray>(n_, topic_name, 1));
+    std::map<std::string, int> m;
+
+    marker_pub_.push_back(rt_pub);
+    marker_map_.push_back(m);
+    marker_array_.push_back(visualization_msgs::MarkerArray());
+    return true;
+  }
+
+  bool MarkerManager::addMarker(const std::string &group_key, const std::string &marker_name, const std::string &ns, const std::string &frame_id, MarkerType type)
+  {
+    int group_id, id;
+
+    if (!getIndex(group_key, group_id))
+    {
+      return false;
+    }
+
+    if (getMarkerId(group_key, marker_name, id))
     {
       ROS_ERROR_STREAM("MarkerManager: Tried to add marker " << marker_name << " that is already on the marker array");
       return false;
@@ -42,7 +68,7 @@ namespace generic_control_toolbox
     new_marker.color.a = 1.0;
 
     int max_id = -1;
-    for (auto const &entry : marker_map_)
+    for (auto const &entry : marker_map_[group_id])
     {
       if (entry.second > max_id)
       {
@@ -52,91 +78,121 @@ namespace generic_control_toolbox
 
     new_marker.id = max_id + 1;
 
-    marker_map_[marker_name] = max_id + 1;
-    marker_array_.markers.push_back(new_marker);
+    marker_map_[group_id][marker_name] = max_id + 1;
+    marker_array_[group_id].markers.push_back(new_marker);
 
     return true;
   }
 
-  bool MarkerManager::setMarkerColor(const std::string &marker_name, double r, double g, double b)
+  bool MarkerManager::setMarkerColor(const std::string &group_key, const std::string &marker_name, double r, double g, double b)
   {
-    int id;
+    int id, group_id;
 
-    if (!getMarkerId(marker_name, id))
+    if (!getIndex(group_key, group_id))
     {
       return false;
     }
 
-    marker_array_.markers[id].color.r = r;
-    marker_array_.markers[id].color.g = g;
-    marker_array_.markers[id].color.b = b;
-    return true;
-  }
-
-  bool MarkerManager::setMarkerScale(const std::string &marker_name, double x, double y, double z)
-  {
-    int id;
-
-    if (!getMarkerId(marker_name, id))
+    if (!getMarkerId(group_key, marker_name, id))
     {
       return false;
     }
 
-    marker_array_.markers[id].scale.x = x;
-    marker_array_.markers[id].scale.y = y;
-    marker_array_.markers[id].scale.z = z;
+    marker_array_[group_id].markers[id].color.r = r;
+    marker_array_[group_id].markers[id].color.g = g;
+    marker_array_[group_id].markers[id].color.b = b;
     return true;
   }
 
-  bool MarkerManager::setMarkerPoints(const std::string &marker_name, const Eigen::Vector3d &initial_point, const Eigen::Vector3d &final_point)
+  bool MarkerManager::setMarkerScale(const std::string &group_key, const std::string &marker_name, double x, double y, double z)
   {
-    int id;
+    int id, group_id;
 
-    if (!getMarkerId(marker_name, id))
+    if (!getIndex(group_key, group_id))
+    {
+      return false;
+    }
+
+    if (!getMarkerId(group_key, marker_name, id))
+    {
+      return false;
+    }
+
+    marker_array_[group_id].markers[id].scale.x = x;
+    marker_array_[group_id].markers[id].scale.y = y;
+    marker_array_[group_id].markers[id].scale.z = z;
+    return true;
+  }
+
+  bool MarkerManager::setMarkerPoints(const std::string &group_key, const std::string &marker_name, const Eigen::Vector3d &initial_point, const Eigen::Vector3d &final_point)
+  {
+    int id, group_id;
+
+    if (!getIndex(group_key, group_id))
+    {
+      return false;
+    }
+
+    if (!getMarkerId(group_key, marker_name, id))
     {
       return false;
     }
 
     geometry_msgs::Point point;
-    marker_array_.markers[id].points.clear();
+    marker_array_[group_id].markers[id].points.clear();
     tf::pointEigenToMsg(initial_point, point);
-    marker_array_.markers[id].points.push_back(point);
+    marker_array_[group_id].markers[id].points.push_back(point);
     tf::pointEigenToMsg(final_point, point);
-    marker_array_.markers[id].points.push_back(point);
+    marker_array_[group_id].markers[id].points.push_back(point);
     return true;
   }
 
-  bool MarkerManager::setMarkerPose(const std::string &marker_name, const Eigen::Affine3d &pose)
+  bool MarkerManager::setMarkerPose(const std::string &group_key, const std::string &marker_name, const Eigen::Affine3d &pose)
   {
-    int id;
+    int id, group_id;
 
-    if (!getMarkerId(marker_name, id))
+    if (!getIndex(group_key, group_id))
     {
       return false;
     }
 
-    tf::poseEigenToMsg(pose, marker_array_.markers[id].pose);
+    if (!getMarkerId(group_key, marker_name, id))
+    {
+      return false;
+    }
+
+    tf::poseEigenToMsg(pose, marker_array_[group_id].markers[id].pose);
     return true;
   }
 
   void MarkerManager::publishMarkers()
   {
-    if (marker_pub_->trylock())
+    for (unsigned int i = 0; i < marker_pub_.size(); i ++)
     {
-      marker_pub_->msg_ = marker_array_;
-      marker_pub_->unlockAndPublish();
+      if (marker_pub_[i]->trylock())
+      {
+        marker_pub_[i]->msg_ = marker_array_[i];
+        marker_pub_[i]->unlockAndPublish();
+      }
     }
   }
 
-  bool MarkerManager::getMarkerId(const std::string &marker_name, int &id) const
+  bool MarkerManager::getMarkerId(const std::string &group_key, const std::string &marker_name, int &id) const
   {
-    for (auto const &it : marker_map_)
+    int group_id;
+
+    if (!getIndex(group_key, group_id))
+    {
+      return false;
+    }
+
+    for (auto const &it : marker_map_[group_id])
     {
       if (it.first == marker_name)
       {
-        for (unsigned long i = 0; i < marker_array_.markers.size(); i++)
+        for (unsigned long i = 0; i < marker_array_[group_id].markers.size(); i++)
         {
-          if (marker_array_.markers[i].id == it.second)
+          if (marker_array_[group_id].markers[i].id == it.second)
           {
             id = it.second;
             return true;

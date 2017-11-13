@@ -5,22 +5,22 @@ namespace generic_control_toolbox
   ManagerBase::ManagerBase(){}
   ManagerBase::~ManagerBase(){}
 
-  bool ManagerBase::getArmIndex(const std::string &eef, int &arm) const
+  bool ManagerBase::getIndex(const std::string &key, int &i) const
   {
-    arm = -1;
+    i = -1;
 
-    for (int i = 0; i < end_effector_.size(); i++)
+    for (int j = 0; j < manager_index_.size(); j++)
     {
-      if (eef == end_effector_[i])
+      if (key == manager_index_[j])
       {
-        arm = i;
+        i = j;
         break;
       }
     }
 
-    if (arm < 0)
+    if (i < 0)
     {
-      ROS_ERROR("End-effector %s was not initialized", eef.c_str());
+      ROS_ERROR("Key %s was not initialized", key.c_str());
       return false;
     }
 

@@ -14,7 +14,7 @@ namespace generic_control_toolbox
   bool WrenchManager::initializeWrenchComm(const std::string &end_effector, const std::string &sensor_frame, const std::string &gripping_point_frame, const std::string &sensor_topic)
   {
     int a;
-    if (getArmIndex(end_effector, a))
+    if (getIndex(end_effector, a))
     {
       ROS_ERROR("Cannot initialize wrench subscriber for end-effector %s: already initialized", end_effector.c_str());
       return false;
@@ -56,7 +56,7 @@ namespace generic_control_toolbox
     // Everything is ok, can add new comm.
     KDL::Frame sensor_to_gripping_point_kdl;
     tf::poseMsgToKDL(sensor_to_gripping_point.pose, sensor_to_gripping_point_kdl);
-    end_effector_.push_back(end_effector);
+    manager_index_.push_back(end_effector);
     sensor_frame_.push_back(sensor_frame);
     sensor_to_gripping_point_.push_back(sensor_to_gripping_point_kdl);
     measured_wrench_.push_back(KDL::Wrench::Zero());
@@ -67,7 +67,7 @@ namespace generic_control_toolbox
   bool WrenchManager::wrenchAtGrippingPoint(const std::string &end_effector, Eigen::Matrix<double, 6, 1> &wrench) const
   {
     int arm;
-    if (!getArmIndex(end_effector, arm))
+    if (!getIndex(end_effector, arm))
     {
       return false;
     }

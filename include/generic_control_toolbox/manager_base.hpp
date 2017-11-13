@@ -15,16 +15,16 @@ namespace generic_control_toolbox
     virtual ~ManagerBase();
 
   protected:
-    std::vector<std::string> end_effector_;
+    std::vector<std::string> manager_index_;
 
     /**
-      Get the index of the arm with the given end-effector.
+      Get the index for the given key stored in the manager index vector.
 
-      @param eef The end-effector of the kinematic chain.
-      @param arm The arm index
-      @return true if the arm is found, false otherwise.
+      @param key The key.
+      @param i The index
+      @return true if the key is found, false otherwise.
     **/
-    bool getArmIndex(const std::string &eef, int &arm) const;
+    bool getIndex(const std::string &key, int &i) const;
   };
 }
 

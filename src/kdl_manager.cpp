@@ -18,7 +18,7 @@ namespace generic_control_toolbox
     bool KDLManager::initializeArm(const std::string &end_effector_link)
     {
       int a;
-      if(getArmIndex(end_effector_link, a))
+      if(getIndex(end_effector_link, a))
       {
         ROS_ERROR_STREAM("Tried to initialize arm " << end_effector_link << ", but it was already initialized");
         return false;
@@ -35,7 +35,7 @@ namespace generic_control_toolbox
       }
 
       // Ready to accept the end-effector as valid
-      end_effector_.push_back(end_effector_link);
+      manager_index_.push_back(end_effector_link);
       chain_.push_back(chain);
       std::vector<std::string> new_vector;
 
@@ -69,7 +69,7 @@ namespace generic_control_toolbox
     {
       int arm;
 
-      if (!getArmIndex(end_effector_link, arm))
+      if (!getIndex(end_effector_link, arm))
       {
         return false;
       }
@@ -90,7 +90,7 @@ namespace generic_control_toolbox
     {
       int arm;
 
-      if (!getArmIndex(end_effector_link, arm))
+      if (!getIndex(end_effector_link, arm))
       {
         return false;
       }
@@ -110,7 +110,7 @@ namespace generic_control_toolbox
     {
       int arm;
 
-      if (!getArmIndex(end_effector_link, arm))
+      if (!getIndex(end_effector_link, arm))
       {
         return false;
       }
@@ -157,7 +157,7 @@ namespace generic_control_toolbox
 
       int arm;
 
-      if (!getArmIndex(end_effector_link, arm))
+      if (!getIndex(end_effector_link, arm))
       {
         return false;
       }
@@ -193,7 +193,7 @@ namespace generic_control_toolbox
     {
       int arm;
 
-      if (!getArmIndex(end_effector_link, arm))
+      if (!getIndex(end_effector_link, arm))
       {
         return false;
       }
@@ -212,7 +212,7 @@ namespace generic_control_toolbox
     {
       int arm;
 
-      if (!getArmIndex(end_effector_link, arm))
+      if (!getIndex(end_effector_link, arm))
       {
         return false;
       }
@@ -231,7 +231,7 @@ namespace generic_control_toolbox
     {
       int arm;
 
-      if (!getArmIndex(end_effector_link, arm))
+      if (!getIndex(end_effector_link, arm))
       {
         return false;
       }
@@ -250,7 +250,7 @@ namespace generic_control_toolbox
     {
       int arm;
 
-      if (!getArmIndex(end_effector_link, arm))
+      if (!getIndex(end_effector_link, arm))
       {
         return false;
       }
@@ -270,7 +270,7 @@ namespace generic_control_toolbox
     {
       int arm;
 
-      if (!getArmIndex(end_effector_link, arm))
+      if (!getIndex(end_effector_link, arm))
       {
         return false;
       }
@@ -329,7 +329,7 @@ namespace generic_control_toolbox
     {
       int arm;
 
-      if (!getArmIndex(end_effector_link, arm))
+      if (!getIndex(end_effector_link, arm))
       {
         return false;
       }
@@ -349,7 +349,7 @@ namespace generic_control_toolbox
     {
       int arm;
 
-      if (!getArmIndex(end_effector_link, arm))
+      if (!getIndex(end_effector_link, arm))
       {
         return false;
       }
@@ -369,7 +369,7 @@ namespace generic_control_toolbox
     {
       int arm;
 
-      if (!getArmIndex(end_effector_link, arm))
+      if (!getIndex(end_effector_link, arm))
       {
         return false;
       }
@@ -389,7 +389,7 @@ namespace generic_control_toolbox
     {
       int arm;
 
-      if (!getArmIndex(end_effector_link, arm))
+      if (!getIndex(end_effector_link, arm))
       {
         return false;
       }
