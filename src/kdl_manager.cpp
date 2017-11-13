@@ -168,22 +168,27 @@ namespace generic_control_toolbox
         return false;
       }
 
-      int joint_index = 0;
+      bool found;
 
-      for (unsigned long i = 0; i < state.name.size(); i++)
+      for (unsigned long i = 0; i < actuated_joint_names_[arm].size(); i ++)
       {
-        if (hasJoint(chain_[arm], state.name[i]))
+        found = false;
+        for (unsigned long j = 0; j < state.name.size(); j++)
         {
-          state.position[i] = q[joint_index];
-          state.velocity[i] = qdot[joint_index];
-          joint_index++;
+          if (state.name[j] == actuated_joint_names_[arm][i])
+          {
+            state.position[j] = q[i];
+            state.velocity[j] = qdot[i];
+            found = true;
+            break;
+          }
         }
-      }
 
-      if (joint_index != chain_[arm].getNrOfJoints())
-      {
-        ROS_ERROR("Could not find all the joints in the provided joint state message");
-        return false;
+        if (!found)
+        {
+          ROS_ERROR_STREAM("KDLManager: Missing joint " << actuated_joint_names_[arm][i] << " from given joint state");
+          return false;
+        }
       }
 
       return true;
