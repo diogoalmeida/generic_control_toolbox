@@ -51,6 +51,16 @@ namespace generic_control_toolbox
     bool setGrippingPoint(const std::string &end_effector_link, const std::string &gripping_point_frame);
 
     /**
+      Queries TF for the rigid transform between the end-effector link frame and
+      the gripping point frame, and stores it as a KDL Frame.
+
+      @param end_effector_link The end-effector link name.
+      @param sensor_point_frame TF name of the sensor point frame.
+      @return False if transform is not found or something else goes wrong, true otherwise.
+    **/
+    bool setSensorPoint(const std::string &end_effector_link, const std::string &sensor_point_frame);
+
+    /**
       Fills the joint state message given only joint velocities. Joint positions are
       taken from the joint state message.
 
@@ -84,6 +94,17 @@ namespace generic_control_toolbox
       @return False if something goes wrong, true otherwise.
     **/
     bool getGrippingPoint(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const;
+
+    /**
+      Returns the sensor point of the chosen arm.
+      By default this is set to be the end-effector pose.
+
+      @param end_effector_link The arm's end-effector name.
+      @param state The robot joint state.
+      @param out The resulting sensor point frame.
+      @return False if something goes wrong, true otherwise.
+    **/
+    bool getSensorPoint(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const;
 
     /**
       Returns the twist of the requested end-effector's gripping point.
@@ -128,6 +149,16 @@ namespace generic_control_toolbox
     **/
     bool getJacobian(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Jacobian &out) const;
 
+    /**
+      Returns the gripping frame.
+
+      @param end_effector_link The name of the requested chain's end-effector.
+      @param state The current robot joint state.
+      @param out The KDL frame of the chain's gripping point.
+      @return False in case something goes wrong, true otherwise.
+    **/
+    bool getGrippingFrame(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const;
+
   private:
     std::vector<std::shared_ptr<KDL::ChainIkSolverVel_wdls> > ikvel_;
     std::vector<std::shared_ptr<KDL::ChainIkSolverPos_LMA> > ikpos_;
@@ -135,6 +166,7 @@ namespace generic_control_toolbox
     std::vector<std::shared_ptr<KDL::ChainFkSolverVel_recursive> > fkvel_;
     std::vector<std::shared_ptr<KDL::ChainJntToJacSolver> > jac_solver_;
     std::vector<KDL::Frame> eef_to_gripping_point_;
+    std::vector<KDL::Frame> eef_to_sensor_point_;
     std::vector<KDL::Chain> chain_;
 
     urdf::Model model_;
@@ -162,6 +194,16 @@ namespace generic_control_toolbox
       @return False in case something goes wrong, true otherwise.
     **/
     bool getEefTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::FrameVel &out) const;
+
+    /**
+      Queries TF to get the rigid transform between two frames
+
+      @param base_frame The base frame of the transform.
+      @param target_frame The target frame of the transform.
+      @param out The rigid transform between the two frames in the KDL format.
+      @return False in case something goes wrong, true otherwise.
+    **/
+    bool getRigidTransform(const std::string &base_frame, const std::string &target_frame, KDL::Frame &out) const;
 
     /**
       Fills in the joint arrays with the state of a given kinematic chain.
