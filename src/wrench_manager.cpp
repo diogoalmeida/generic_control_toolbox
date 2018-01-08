@@ -44,7 +44,7 @@ namespace generic_control_toolbox
       {
         ROS_WARN("TF exception in wrench manager: %s", ex.what());
       }
-      sleep(0.1);
+      ros::Duration(0.1).sleep();
     }
 
     if (attempts >= max_tf_attempts_)
@@ -61,6 +61,9 @@ namespace generic_control_toolbox
     sensor_to_gripping_point_.push_back(sensor_to_gripping_point_kdl);
     measured_wrench_.push_back(KDL::Wrench::Zero());
     ft_sub_.push_back(nh_.subscribe(sensor_topic, 1, &WrenchManager::forceTorqueCB, this));
+    gripping_frame_.push_back(gripping_point_frame);
+    processed_ft_pub_.push_back(nh_.advertise<geometry_msgs::WrenchStamped>(sensor_topic + "_converted", 1));
+
     return true;
   }
 
@@ -73,8 +76,16 @@ namespace generic_control_toolbox
     }
 
     KDL::Wrench wrench_kdl;
+    geometry_msgs::WrenchStamped temp_wrench;
     wrench_kdl = sensor_to_gripping_point_[arm]*measured_wrench_[arm];
     tf::wrenchKDLToEigen(wrench_kdl, wrench);
+
+    // publish processed wrench to facilitate debugging
+    tf::wrenchKDLToMsg(wrench_kdl, temp_wrench.wrench);
+    temp_wrench.header.frame_id = gripping_frame_[arm];
+    temp_wrench.header.stamp = ros::Time::now();
+    processed_ft_pub_[arm].publish(temp_wrench);
+
     return true;
   }
 

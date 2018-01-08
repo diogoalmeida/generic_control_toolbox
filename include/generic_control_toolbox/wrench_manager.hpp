@@ -49,6 +49,8 @@ namespace generic_control_toolbox
     std::vector<KDL::Frame> sensor_to_gripping_point_;
     std::vector<KDL::Wrench > measured_wrench_;
     std::vector<ros::Subscriber> ft_sub_;
+    std::vector<ros::Publisher> processed_ft_pub_;
+    std::vector<std::string> gripping_frame_;
     tf::TransformListener listener_;
     ros::NodeHandle nh_;
 
