@@ -66,6 +66,7 @@ namespace generic_control_toolbox
     new_marker.frame_locked = false;
     new_marker.color.r = 1.0;
     new_marker.color.a = 1.0;
+    new_marker.pose.orientation.w = 1.0;
 
     int max_id = -1;
     for (auto const &entry : marker_map_[group_id])
