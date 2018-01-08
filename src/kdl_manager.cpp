@@ -325,8 +325,7 @@ namespace generic_control_toolbox
         return false;
       }
 
-      KDL::Frame base_to_target_kdl;
-      tf::poseMsgToKDL(base_to_target.pose, base_to_target_kdl);
+      tf::poseMsgToKDL(base_to_target.pose, out);
       return true;
     }
 
