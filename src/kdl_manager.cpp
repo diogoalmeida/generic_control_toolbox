@@ -9,8 +9,17 @@ namespace generic_control_toolbox
         throw std::runtime_error("ERROR getting robot description (/robot_description)");
       }
 
-      eps_ = 0.001; // TODO: Make parameter
-      max_tf_attempts_ = 5;
+      nh_ = ros::NodeHandle("~");
+
+      if (!nh_.getParam("kdl_manager/eps", eps_))
+      {
+        eps_ = 0.001;
+      }
+
+      if (!nh_.getParam("kdl_manager/max_tf_attempts", max_tf_attempts_))
+      {
+        max_tf_attempts_ = 5;
+      }
     }
 
     KDLManager::~KDLManager() {}
