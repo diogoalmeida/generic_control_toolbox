@@ -4,7 +4,7 @@
   <version>0.1.0</version>
   <description>Some libraries used in my control projects</description>
   <maintainer email="diogoa@kth.se">diogo</maintainer>
-  <license>KTH</license>
+  <license>MIT</license>
 
   <buildtool_depend>catkin</buildtool_depend>
   <depend>roscpp</depend>
