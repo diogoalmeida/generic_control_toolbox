@@ -170,6 +170,7 @@ namespace generic_control_toolbox
     std::vector<KDL::Chain> chain_;
 
     urdf::Model model_;
+    ros::NodeHandle nh_;
     tf::TransformListener listener_;
     std::vector<std::vector<std::string> > actuated_joint_names_; // list of actuated joints per arm
     std::string chain_base_link_;
