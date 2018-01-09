@@ -36,6 +36,7 @@ namespace generic_control_toolbox
 
     /**
       Provides access to the measured wrench at the arm's gripping point.
+      Wrench is expressed in the point's frame.
 
       @param end_effector The arm's end-effector name.
       @wrench The wrench at the gripping point.
