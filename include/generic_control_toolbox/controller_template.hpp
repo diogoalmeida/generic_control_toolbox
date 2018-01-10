@@ -35,7 +35,7 @@ namespace generic_control_toolbox
   class ControllerTemplate : public ControllerBase
   {
   public:
-    ControllerTemplate(const std::string action_name);
+    ControllerTemplate(const std::string &action_name);
     virtual ~ControllerTemplate();
 
     /**
@@ -100,7 +100,7 @@ namespace generic_control_toolbox
   };
 
   template <class ActionClass, class ActionGoal, class ActionFeedback, class ActionResult>
-  ControllerTemplate<ActionClass, ActionGoal, ActionFeedback, ActionResult>::ControllerTemplate(const std::string action_name) : action_name_(action_name)
+  ControllerTemplate<ActionClass, ActionGoal, ActionFeedback, ActionResult>::ControllerTemplate(const std::string &action_name) : action_name_(action_name)
   {
     nh_ = ros::NodeHandle("~");
     has_state_ = false;
