@@ -271,6 +271,7 @@ namespace generic_control_toolbox
 
       KDL::JntArray positions(chain_[arm].getNrOfJoints());
       KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
+
       if (!getChainJointState(state, arm, positions, velocities))
       {
         return false;
@@ -395,27 +396,6 @@ namespace generic_control_toolbox
       }
 
       jac_solver_[arm]->JntToJac(positions, out);
-      return true;
-    }
-
-    bool KDLManager::getGrippingFrame(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const
-    {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
-      {
-        return false;
-      }
-
-      KDL::JntArray positions(chain_[arm].getNrOfJoints());
-      KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
-
-      if (!getChainJointState(state, arm, positions, velocities))
-      {
-        return false;
-      }
-
-      fkpos_[arm]->JntToCart(positions, out);
       return true;
     }
 
