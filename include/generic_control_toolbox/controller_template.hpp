@@ -72,6 +72,11 @@ namespace generic_control_toolbox
     preempted or completed.
     **/
     sensor_msgs::JointState lastState(const sensor_msgs::JointState &current);
+
+    boost::shared_ptr<actionlib::SimpleActionServer<ActionClass> > action_server_;
+    ActionFeedback feedback_;
+    ActionResult result_;
+
   private:
     /**
       Method that manages the starting of the actionlib server of each cartesian
@@ -90,9 +95,6 @@ namespace generic_control_toolbox
     virtual void preemptCB();
 
 
-    boost::shared_ptr<actionlib::SimpleActionServer<ActionClass> > action_server_;
-    ActionFeedback feedback_;
-    ActionResult result_;
     std::string action_name_;
     ros::NodeHandle nh_;
     sensor_msgs::JointState last_state_;
