@@ -18,6 +18,7 @@
 #include <kdl/frames.hpp>
 #include <stdexcept>
 #include <generic_control_toolbox/manager_base.hpp>
+#include <generic_control_toolbox/ArmInfo.h>
 
 namespace generic_control_toolbox
 {
@@ -219,5 +220,16 @@ namespace generic_control_toolbox
     **/
     bool hasJoint(const KDL::Chain &chain, const std::string &joint_name) const;
   };
+
+  /**
+    Initializes a kdl manager class with the given arm info.
+    Uses the ros parameter server to obtain information.
+
+    @param arm_info The arm information.
+    @param manager Reference to the kdl manager.
+    @return False if something goes wrong, true otherwise.
+  **/
+  bool setKDLManager(const ArmInfo &arm_info, std::shared_ptr<KDLManager> manager);
+
 }
 #endif

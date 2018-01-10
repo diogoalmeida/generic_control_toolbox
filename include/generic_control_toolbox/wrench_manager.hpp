@@ -62,5 +62,15 @@ namespace generic_control_toolbox
     **/
     void forceTorqueCB(const geometry_msgs::WrenchStamped::ConstPtr &msg);
   };
+
+  /**
+    Initializes a wrench manager class with the given arm's sensor info.
+    Uses the ros parameter server to obtain information."
+
+    @param arm_info The arm information
+    @param manager Reference to the wrench manager.
+    @return False if something goes wrong, true otherwise.
+  **/
+  bool setWrenchManager(const ArmInfo &arm_info, WrenchManager &manager);
 }
 #endif

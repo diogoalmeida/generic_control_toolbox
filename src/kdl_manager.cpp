@@ -438,4 +438,21 @@ namespace generic_control_toolbox
 
       return false;
     }
+
+    bool setKDLManager(const ArmInfo &arm_info, std::shared_ptr<KDLManager> manager)
+    {
+      if(!manager->initializeArm(arm_info.kdl_eef_frame))
+      {
+        return false;
+      }
+
+      if (!manager->setGrippingPoint(arm_info.kdl_eef_frame, arm_info.gripping_frame))
+      {
+        return false;
+      }
+
+      ROS_DEBUG("Successfully set up arm %s with eef_frame %s and gripping_frame %s", arm_info.name.c_str(), arm_info.kdl_eef_frame.c_str(), arm_info.gripping_frame.c_str());
+
+      return true;
+    }
 }

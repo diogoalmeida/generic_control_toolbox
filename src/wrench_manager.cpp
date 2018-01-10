@@ -109,4 +109,24 @@ namespace generic_control_toolbox
 
     tf::wrenchMsgToKDL(msg->wrench, measured_wrench_[sensor_num]);
   }
+
+  bool setWrenchManager(const ArmInfo &arm_info, WrenchManager &manager)
+  {
+    if (arm_info.has_ft_sensor)
+    {
+      if (!manager.initializeWrenchComm(arm_info.kdl_eef_frame, arm_info.sensor_frame, arm_info.gripping_frame, arm_info.sensor_topic))
+      {
+        return false;
+      }
+
+      ROS_DEBUG("Successfully initialized wrench comms for arm %s", arm_info.name.c_str());
+    }
+    else
+    {
+      ROS_WARN("End-effector %s has no F/T sensor.", arm_info.kdl_eef_frame.c_str());
+    }
+
+
+    return true;
+  }
 }
