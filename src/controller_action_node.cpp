@@ -24,6 +24,7 @@ namespace generic_control_toolbox
     ros::Rate r(loop_rate_);
     ros::Time prev_time = ros::Time::now();
     sensor_msgs::JointState command;
+    bool was_running = false;
 
     while(ros::ok())
     {
@@ -33,10 +34,16 @@ namespace generic_control_toolbox
         if (controller.isActive())
         {
           ROS_DEBUG_THROTTLE(10, "Controller is active, publishing");
+          was_running = true;
           state_pub_.publish(command);
         }
         else
         {
+          if (was_running)
+          {
+            state_pub_.publish(command); // publish the last command msg
+            was_running = false;
+          }
           ROS_DEBUG_THROTTLE(10, "Controller is not active, skipping");
         }
       }
