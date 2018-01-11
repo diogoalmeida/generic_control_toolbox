@@ -130,6 +130,17 @@ namespace generic_control_toolbox
     bool getPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out) const;
 
     /**
+      Returns the inverse differential kinematics of the requested gripping point, given a desired twist.
+
+      @param end_effector_link The name of the requested end-effector.
+      @param state The current robot joint state.
+      @param in Desired gripping point twist.
+      @param out Joint state for the desired twist.
+      @return False in case something goes wrong, true otherwise.
+    **/
+    bool getGrippingVelIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Twist &in, KDL::JntArray &out) const;
+
+    /**
       Returns the inverse differential kinematics of the requested end-effector, given a desired twist.
 
       @param end_effector_link The name of the requested end-effector.
@@ -151,22 +162,22 @@ namespace generic_control_toolbox
     bool getJacobian(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Jacobian &out) const;
 
     /**
-    Returns the pose of the requested end-effector, given a joint state.
+      Returns the pose of the requested end-effector, given a joint state.
 
-    @param end_effector_link The name of the requested end-effector.
-    @param state The current robot joint state.
-    @param out The resulting eef pose.
-    @return False in case something goes wrong, true otherwise.
+      @param end_effector_link The name of the requested end-effector.
+      @param state The current robot joint state.
+      @param out The resulting eef pose.
+      @return False in case something goes wrong, true otherwise.
     **/
     bool getEefPose(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const;
 
     /**
-    Returns the twist of the requested end-effector, given a joint state.
+      Returns the twist of the requested end-effector, given a joint state.
 
-    @param end_effector_link The name of the requested end-effector.
-    @param state The current robot joint state.
-    @param out The resulting eef twist.
-    @return False in case something goes wrong, true otherwise.
+      @param end_effector_link The name of the requested end-effector.
+      @param state The current robot joint state.
+      @param out The resulting eef twist.
+      @return False in case something goes wrong, true otherwise.
     **/
     bool getEefTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::FrameVel &out) const;
 

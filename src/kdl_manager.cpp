@@ -359,6 +359,32 @@ namespace generic_control_toolbox
       return true;
     }
 
+    bool KDLManager::getGrippingVelIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Twist &in, KDL::JntArray &out) const
+    {
+      KDL::Frame eef_to_base;
+      KDL::Twist modified_in;
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      if (!getEefPose(end_effector_link, state, eef_to_base))
+      {
+        return false;
+      }
+
+      modified_in = eef_to_base*eef_to_gripping_point_[arm]*in;
+
+      if (!getVelIK(end_effector_link, state, modified_in, out))
+      {
+        return false;
+      }
+
+      return true;
+    }
+
     bool KDLManager::getVelIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Twist &in, KDL::JntArray &out) const
     {
       int arm;
