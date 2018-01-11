@@ -37,7 +37,7 @@ generate_messages(
 catkin_package(
   CATKIN_DEPENDS roscpp geometry_msgs cmake_modules eigen_conversions kdl_parser sensor_msgs tf_conversions tf visualization_msgs realtime_tools
   INCLUDE_DIRS include
-  LIBRARIES matrix_parser kdl_manager wrench_manager controller_template marker_manager
+  LIBRARIES matrix_parser kdl_manager wrench_manager controller_template marker_manager controller_action_node
 )
 
 include_directories(
@@ -64,3 +64,7 @@ add_dependencies(marker_manager ${catkin_EXPORTED_TARGETS})
 add_library(controller_template src/controller_template.cpp)
 target_link_libraries(controller_template ${catkin_LIBRARIES})
 add_dependencies(controller_template ${catkin_EXPORTED_TARGETS})
+
+add_library(controller_action_node src/controller_action_node.cpp)
+target_link_libraries(controller_action_node ${catkin_LIBRARIES})
+add_dependencies(controller_action_node ${catkin_EXPORTED_TARGETS})

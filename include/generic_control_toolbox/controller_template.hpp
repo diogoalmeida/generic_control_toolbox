@@ -25,6 +25,13 @@ namespace generic_control_toolbox
       @return Desired joint states.
     **/
     virtual sensor_msgs::JointState updateControl(const sensor_msgs::JointState &current_state, const ros::Duration &dt) = 0;
+
+    /**
+      Indicates if the controller is active.
+
+      @return True if active, and the controller output is to be used, False otherwise.
+    **/
+    virtual bool isActive() const = 0 ;
   };
 
   /**
@@ -42,6 +49,8 @@ namespace generic_control_toolbox
       Wraps the control algorithm with actionlib-related management.
     **/
     virtual sensor_msgs::JointState updateControl(const sensor_msgs::JointState &current_state, const ros::Duration &dt);
+
+    virtual bool isActive() const;
 
   protected:
     /**
@@ -118,6 +127,17 @@ namespace generic_control_toolbox
     }
 
     return controlAlgorithm(current_state, dt);
+  }
+
+  template <class ActionClass, class ActionGoal, class ActionFeedback, class ActionResult>
+  bool ControllerTemplate<ActionClass, ActionGoal, ActionFeedback, ActionResult>::isActive() const
+  {
+    if (!action_server_->isActive())
+    {
+      return false;
+    }
+
+    return true;
   }
 
   template <class ActionClass, class ActionGoal, class ActionFeedback, class ActionResult>
