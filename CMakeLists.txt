@@ -47,24 +47,24 @@ include_directories(
 
 add_library(matrix_parser src/matrix_parser.cpp)
 target_link_libraries(matrix_parser ${catkin_LIBRARIES})
-add_dependencies(matrix_parser ${catkin_EXPORTED_TARGETS})
+add_dependencies(matrix_parser ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 add_library(kdl_manager src/kdl_manager.cpp src/manager_base.cpp)
 target_link_libraries(kdl_manager ${catkin_LIBRARIES})
-add_dependencies(kdl_manager ${catkin_EXPORTED_TARGETS})
+add_dependencies(kdl_manager ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 add_library(wrench_manager src/wrench_manager.cpp src/manager_base.cpp)
 target_link_libraries(wrench_manager ${catkin_LIBRARIES})
-add_dependencies(wrench_manager ${catkin_EXPORTED_TARGETS})
+add_dependencies(wrench_manager ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 add_library(marker_manager src/marker_manager.cpp)
 target_link_libraries(marker_manager ${catkin_LIBRARIES})
-add_dependencies(marker_manager ${catkin_EXPORTED_TARGETS})
+add_dependencies(marker_manager ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 add_library(controller_template src/controller_template.cpp)
 target_link_libraries(controller_template ${catkin_LIBRARIES})
-add_dependencies(controller_template ${catkin_EXPORTED_TARGETS})
+add_dependencies(controller_template ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 add_library(controller_action_node src/controller_action_node.cpp)
 target_link_libraries(controller_action_node ${catkin_LIBRARIES})
-add_dependencies(controller_action_node ${catkin_EXPORTED_TARGETS})
+add_dependencies(controller_action_node ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
