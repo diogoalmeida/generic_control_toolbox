@@ -143,6 +143,12 @@ namespace generic_control_toolbox
   template <class ActionClass, class ActionGoal, class ActionFeedback, class ActionResult>
   sensor_msgs::JointState ControllerTemplate<ActionClass, ActionGoal, ActionFeedback, ActionResult>::lastState(const sensor_msgs::JointState &current)
   {
+    if (current.position.size() == 0) // Invalid state
+    {
+      ROS_WARN("lastState got invalid state");
+      return last_state_;
+    }
+
     if(!has_state_)
     {
       last_state_ = current;
