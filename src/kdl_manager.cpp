@@ -48,6 +48,7 @@ namespace generic_control_toolbox
       chain_.push_back(chain);
       std::vector<std::string> new_vector;
 
+      ROS_DEBUG("Initializing chain:");
       for (unsigned int i = 0; i < chain.getNrOfSegments(); i++) // check for non-movable joints
       {
         kdl_joint = chain.getSegment(i).getJoint();
@@ -57,6 +58,7 @@ namespace generic_control_toolbox
           continue;
         }
 
+        ROS_DEBUG_STREAM(kdl_joint.getName());
         new_vector.push_back(kdl_joint.getName());
       }
 
