@@ -252,6 +252,12 @@ namespace generic_control_toolbox
         return false;
       }
 
+      KDL::Frame gripping_pose;
+      if (!getGrippingPoint(end_effector_link, state, gripping_pose))
+      {
+        return false;
+      }
+
       KDL::Frame eef_pose;
       if (!getEefPose(end_effector_link, state, eef_pose))
       {
@@ -264,7 +270,17 @@ namespace generic_control_toolbox
         return false;
       }
 
-      out = (eef_pose*eef_to_gripping_point_[arm].Inverse()).Inverse()*eef_twist.GetTwist();
+      Eigen::Vector3d vel_eig, rot_eig, converted_vel, r_eig;
+      KDL::Vector r = gripping_pose.p - eef_pose.p;
+
+      vel_eig << eef_twist.GetTwist().vel.data[0], eef_twist.GetTwist().vel.data[1], eef_twist.GetTwist().vel.data[2];
+      rot_eig << eef_twist.GetTwist().rot.data[0], eef_twist.GetTwist().rot.data[1], eef_twist.GetTwist().rot.data[2];
+      r_eig << r.data[0], r.data[1], r.data[2];
+
+      converted_vel = vel_eig - parser_.computeSkewSymmetric(r_eig)*rot_eig;
+      out.vel = KDL::Vector(converted_vel[0], converted_vel[1], converted_vel[2]);
+      out.rot = eef_twist.GetTwist().rot;
+
       return true;
     }
 

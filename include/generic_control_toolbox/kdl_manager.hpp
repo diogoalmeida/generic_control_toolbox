@@ -18,6 +18,7 @@
 #include <kdl/frames.hpp>
 #include <stdexcept>
 #include <generic_control_toolbox/manager_base.hpp>
+#include <generic_control_toolbox/matrix_parser.hpp>
 #include <generic_control_toolbox/ArmInfo.h>
 
 namespace generic_control_toolbox
@@ -193,6 +194,7 @@ namespace generic_control_toolbox
 
     urdf::Model model_;
     ros::NodeHandle nh_;
+    MatrixParser parser_;
     tf::TransformListener listener_;
     std::vector<std::vector<std::string> > actuated_joint_names_; // list of actuated joints per arm
     std::string chain_base_link_;
