@@ -252,13 +252,19 @@ namespace generic_control_toolbox
         return false;
       }
 
+      KDL::Frame eef_pose;
+      if (!getEefPose(end_effector_link, state, eef_pose))
+      {
+        return false;
+      }
+
       KDL::FrameVel eef_twist;
       if (!getEefTwist(end_effector_link, state, eef_twist))
       {
         return false;
       }
 
-      out = eef_to_gripping_point_[arm].Inverse()*eef_twist.GetTwist();
+      out = (eef_pose*eef_to_gripping_point_[arm].Inverse()).Inverse()*eef_twist.GetTwist();
       return true;
     }
 
