@@ -49,7 +49,7 @@ add_library(matrix_parser src/matrix_parser.cpp)
 target_link_libraries(matrix_parser ${catkin_LIBRARIES})
 add_dependencies(matrix_parser ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-add_library(kdl_manager src/kdl_manager.cpp src/manager_base.cpp)
+add_library(kdl_manager src/kdl_manager.cpp src/manager_base.cpp src/matrix_parser.cpp)
 target_link_libraries(kdl_manager ${catkin_LIBRARIES})
 add_dependencies(kdl_manager ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
