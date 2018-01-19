@@ -452,6 +452,17 @@ namespace generic_control_toolbox
     bool KDLManager::getChainJointState(const sensor_msgs::JointState &current_state, int arm, KDL::JntArray &positions, KDL::JntArrayVel &velocities) const
     {
       unsigned int processed_joints = 0;
+      unsigned int name_size, pos_size, vel_size;
+
+      name_size = current_state.name.size();
+      pos_size = current_state.position.size();
+      vel_size = current_state.velocity.size();
+
+      if (name_size != pos_size || name_size != vel_size)
+      {
+        ROS_ERROR("Got joint state where the name, position and velocity dimensions (resp. %d, %d, %d) are different", name_size, pos_size, vel_size);
+        return false;
+      }
 
       for (unsigned long i = 0; i < actuated_joint_names_[arm].size(); i++)
       {
