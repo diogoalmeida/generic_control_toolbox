@@ -325,6 +325,62 @@ namespace generic_control_toolbox
       return true;
     }
 
+    bool KDLManager::getJointLimits(const std::string &end_effector_link, KDL::JntArray &q_min, KDL::JntArray &q_max, KDL::JntArray &q_vel_lim) const
+    {
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      unsigned int joint_n = chain_[arm].getNrOfJoints();
+      if (q_min.rows() != joint_n || q_max.rows() != joint_n || q_vel_lim.rows() != joint_n)
+      {
+        ROS_ERROR("KDLManager::getJointPositionLimits requires initialized joint arrays");
+        return false;
+      }
+
+      boost::shared_ptr<const urdf::Joint> joint;
+      boost::shared_ptr<urdf::JointLimits> limits;
+      int j = 0;
+      // run through the kinematic chain joints and get the limits from the urdf model
+      for (unsigned int i = 0; i < chain_[arm].getNrOfSegments(); i++)
+      {
+        if (chain_[arm].getSegment(i).getJoint().getType() == KDL::Joint::JointType::None)
+        {
+          continue;
+        }
+
+        joint = model_.getJoint(chain_[arm].getSegment(i).getJoint().getName());
+        limits = joint->limits;
+        q_min(j) = limits->lower;
+        q_max(j) = limits->upper;
+        q_vel_lim(j) = limits->velocity;
+        j++;
+      }
+
+      return true;
+    }
+
+    bool KDLManager::getJointPositions(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::JntArray &q) const
+    {
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      KDL::JntArrayVel v(q.rows());
+      if (!getChainJointState(state, arm, q, v))
+      {
+        return false;
+      }
+
+      return true;
+    }
+
     bool KDLManager::getRigidTransform(const std::string &base_frame, const std::string &target_frame, KDL::Frame &out) const
     {
       geometry_msgs::PoseStamped base_to_target;

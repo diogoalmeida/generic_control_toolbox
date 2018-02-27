@@ -13,8 +13,8 @@ namespace generic_control_toolbox
     }
 
     got_first_ = false;
-    joint_state_sub_ = nh_.subscribe("/joint_states", 1000, &ControllerActionNode::jointStatesCb, this);
-    state_pub_ = nh_.advertise<sensor_msgs::JointState>("/joint_command", 1000);
+    joint_state_sub_ = nh_.subscribe("/joint_states", 1, &ControllerActionNode::jointStatesCb, this);
+    state_pub_ = nh_.advertise<sensor_msgs::JointState>("/joint_command", 1);
   }
 
   ControllerActionNode::~ControllerActionNode() {}

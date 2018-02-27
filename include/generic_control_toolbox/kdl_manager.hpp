@@ -182,6 +182,28 @@ namespace generic_control_toolbox
     **/
     bool getEefTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::FrameVel &out) const;
 
+    /**
+      Returns the joint limits for all the actuated joints in the eef kinematic
+      chain.
+
+      @param end_effector_link The name of the requested end-effector.
+      @param q_min The lower joint position limit.
+      @param q_max The upper joint position limit.
+      @param q_vel_lim The maximum joint velocity.
+      @return False in case something goes wrong, true otherwise.
+    **/
+    bool getJointLimits(const std::string &end_effector_link, KDL::JntArray &q_min, KDL::JntArray &q_max, KDL::JntArray &q_vel_lim) const;
+
+    /**
+      Returns the current joint positions in the KDL format.
+
+      @param end_effector_link The name of the requested end-effector.
+      @param state The current joint state
+      @param q The joint positions in KDL format
+      @return False in case something goes wrong, true otherwise.
+    **/
+    bool getJointPositions(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::JntArray &q) const;
+
   private:
     std::vector<std::shared_ptr<KDL::ChainIkSolverVel_wdls> > ikvel_;
     std::vector<std::shared_ptr<KDL::ChainIkSolverPos_LMA> > ikpos_;
