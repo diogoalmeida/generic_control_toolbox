@@ -6,6 +6,7 @@
 #include <eigen_conversions/eigen_kdl.h>
 #include <kdl_conversions/kdl_msg.h>
 #include <kdl/chainiksolvervel_wdls.hpp>
+#include <kdl/chainiksolvervel_pinv_nso.hpp>
 #include <kdl/chainiksolverpos_lma.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainfksolvervel_recursive.hpp>
@@ -41,6 +42,17 @@ namespace generic_control_toolbox
       @return false if it is not possible to initialize.
     **/
     bool initializeArm(const std::string &end_effector_link);
+
+    /**
+      Initialize the kinematic chain, solvers and joint arrays for an arm defined by its end-effector link.
+      The kinematic chain is assumed to start at chain_base_link_.
+      Uses the Nso solver with a goal of avoiding joint limits.
+
+      @param end_effector_link The final link of the kinematic chain.
+      @param q_desired Desired joint positions.
+      @return false if it is not possible to initialize.
+    **/
+    bool initializeArmNso(const std::string &end_effector_link);
 
     /**
       Queries TF for the rigid transform between the end-effector link frame and
@@ -205,7 +217,7 @@ namespace generic_control_toolbox
     bool getJointPositions(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::JntArray &q) const;
 
   private:
-    std::vector<std::shared_ptr<KDL::ChainIkSolverVel_wdls> > ikvel_;
+    std::vector<std::shared_ptr<KDL::ChainIkSolverVel> > ikvel_;
     std::vector<std::shared_ptr<KDL::ChainIkSolverPos_LMA> > ikpos_;
     std::vector<std::shared_ptr<KDL::ChainFkSolverPos_recursive> > fkpos_;
     std::vector<std::shared_ptr<KDL::ChainFkSolverVel_recursive> > fkvel_;
@@ -220,8 +232,15 @@ namespace generic_control_toolbox
     tf::TransformListener listener_;
     std::vector<std::vector<std::string> > actuated_joint_names_; // list of actuated joints per arm
     std::string chain_base_link_;
-    double eps_, max_tf_attempts_;
+    double eps_, max_tf_attempts_, nso_weight_;
 
+    /**
+      Common part of the initialize arm methods.
+
+      @param end_effector_link The name of the requested end-effector.
+      @return False in case something goes wrong, true otherwise.
+    **/
+    bool initializeArmCommon(const std::string &end_effector_link);
 
     /**
       Queries TF to get the rigid transform between two frames
@@ -266,5 +285,14 @@ namespace generic_control_toolbox
   **/
   bool setKDLManager(const ArmInfo &arm_info, std::shared_ptr<KDLManager> manager);
 
+  /**
+    Initializes a kdl manager class with the given arm info. Uses nullspace optimization.
+    Uses the ros parameter server to obtain information.
+
+    @param arm_info The arm information.
+    @param manager Reference to the kdl manager.
+    @return False if something goes wrong, true otherwise.
+  **/
+  bool setKDLManagerNso(const ArmInfo &arm_info, std::shared_ptr<KDLManager> manager);
 }
 #endif
