@@ -39,10 +39,19 @@ namespace generic_control_toolbox
       Wrench is expressed in the point's frame.
 
       @param end_effector The arm's end-effector name.
-      @wrench The wrench at the gripping point.
+      @param wrench The wrench at the gripping point.
       @return false in case of error, true otherwise.
     **/
     bool wrenchAtGrippingPoint(const std::string &end_effector, Eigen::Matrix<double, 6, 1> &wrench) const;
+
+    /**
+      Gets the original sensor measurements, at the sensor frame.
+
+      @param end_effector The arm's end-effector name.
+      @param wrench The wrench at the sensor point.
+      @return false in case of error, true otherwise.
+    **/
+    bool wrenchAtSensorPoint(const std::string &end_effector, Eigen::Matrix<double, 6, 1> &wrench) const;
 
   private:
     int max_tf_attempts_;

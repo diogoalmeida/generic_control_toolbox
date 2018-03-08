@@ -89,6 +89,19 @@ namespace generic_control_toolbox
     return true;
   }
 
+  bool WrenchManager::wrenchAtSensorPoint(const std::string &end_effector, Eigen::Matrix<double, 6, 1> &wrench) const
+  {
+    int arm;
+    if (!getIndex(end_effector, arm))
+    {
+      return false;
+    }
+
+    tf::wrenchKDLToEigen(measured_wrench_[arm], wrench);
+
+    return true;
+  }
+
   void WrenchManager::forceTorqueCB(const geometry_msgs::WrenchStamped::ConstPtr &msg)
   {
     int sensor_num = -1;
