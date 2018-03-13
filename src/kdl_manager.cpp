@@ -13,17 +13,36 @@ namespace generic_control_toolbox
 
       if (!nh_.getParam("kdl_manager/eps", eps_))
       {
+        ROS_WARN("KDLManager: Missing eps parameter, setting default");
         eps_ = 0.001;
       }
 
       if (!nh_.getParam("kdl_manager/max_tf_attempts", max_tf_attempts_))
       {
+        ROS_WARN("KDLManager: Missing max_tf_attempts parameter, setting default");
         max_tf_attempts_ = 5;
       }
 
-      if (!nh_.getParam("kdl_manager/nso_weight", nso_weight_))
+      if (!nh_.getParam("kdl_manager/ikvel_solver", ikvel_solver_))
       {
-        nso_weight_ = 4;
+        ROS_WARN("KDLManager: Missing ikvel_solver parameter, setting default");
+        ikvel_solver_ = WDLS_SOLVER;
+      }
+
+      if (ikvel_solver_ != WDLS_SOLVER && ikvel_solver_ != NSO_SOLVER)
+      {
+        ROS_ERROR_STREAM("KDLManager: ikvel_solver has value " << ikvel_solver_ << "but admissible values are " << WDLS_SOLVER << " and " << NSO_SOLVER);
+        ROS_WARN_STREAM("KDLManager: setting ikvel_solver to " << WDLS_SOLVER);
+        ikvel_solver_ = WDLS_SOLVER;
+      }
+
+      if (ikvel_solver_ == NSO_SOLVER)
+      {
+        if (!nh_.getParam("kdl_manager/nso_weight", nso_weight_))
+        {
+          ROS_WARN("KDLManager: Missing nso_weight parameter, setting default");
+          nso_weight_ = 4;
+        }
       }
     }
 
@@ -43,35 +62,25 @@ namespace generic_control_toolbox
         return false;
       }
 
-      ikvel_.push_back(std::shared_ptr<KDL::ChainIkSolverVel_wdls>(new KDL::ChainIkSolverVel_wdls(chain_[arm], eps_)));
-      return true;
-    }
-
-    bool KDLManager::initializeArmNso(const std::string &end_effector_link)
-    {
-      if (!initializeArmCommon(end_effector_link))
+      if (ikvel_solver_ == WDLS_SOLVER)
       {
-        return false;
+        ikvel_.push_back(std::shared_ptr<KDL::ChainIkSolverVel_wdls>(new KDL::ChainIkSolverVel_wdls(chain_[arm], eps_)));
+      }
+      else
+      {
+        unsigned int joint_n = chain_[arm].getNrOfJoints();
+        KDL::JntArray w(joint_n), q_min(joint_n), q_max(joint_n), q_vel_lim(joint_n), q_desired(joint_n);
+        getJointLimits(end_effector_link, q_min, q_max, q_vel_lim);
+
+        for (unsigned int i = 0; i < joint_n; i++)
+        {
+          w(i) = nso_weight_;
+          q_desired(i) = (q_max(i) + q_min(i))/2;
+        }
+
+        ikvel_.push_back(std::shared_ptr<KDL::ChainIkSolverVel_pinv_nso>(new KDL::ChainIkSolverVel_pinv_nso(chain_[arm], q_desired, w, eps_)));
       }
 
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
-      {
-        return false;
-      }
-
-      unsigned int joint_n = chain_[arm].getNrOfJoints();
-      KDL::JntArray w(joint_n), q_min(joint_n), q_max(joint_n), q_vel_lim(joint_n), q_desired(joint_n);
-      getJointLimits(end_effector_link, q_min, q_max, q_vel_lim);
-
-      for (unsigned int i = 0; i < joint_n; i++)
-      {
-        w(i) = nso_weight_;
-        q_desired(i) = (q_max(i) + q_min(i))/2;
-      }
-
-      ikvel_.push_back(std::shared_ptr<KDL::ChainIkSolverVel_pinv_nso>(new KDL::ChainIkSolverVel_pinv_nso(chain_[arm], q_desired, w, eps_)));
       return true;
     }
 
@@ -609,23 +618,6 @@ namespace generic_control_toolbox
     bool setKDLManager(const ArmInfo &arm_info, std::shared_ptr<KDLManager> manager)
     {
       if(!manager->initializeArm(arm_info.kdl_eef_frame))
-      {
-        return false;
-      }
-
-      if (!manager->setGrippingPoint(arm_info.kdl_eef_frame, arm_info.gripping_frame))
-      {
-        return false;
-      }
-
-      ROS_DEBUG("Successfully set up arm %s with eef_frame %s and gripping_frame %s", arm_info.name.c_str(), arm_info.kdl_eef_frame.c_str(), arm_info.gripping_frame.c_str());
-
-      return true;
-    }
-
-    bool setKDLManagerNso(const ArmInfo &arm_info, std::shared_ptr<KDLManager> manager)
-    {
-      if(!manager->initializeArmNso(arm_info.kdl_eef_frame))
       {
         return false;
       }

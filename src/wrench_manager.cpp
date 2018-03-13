@@ -5,8 +5,11 @@ namespace generic_control_toolbox
   WrenchManager::WrenchManager()
   {
     nh_ = ros::NodeHandle("~");
-    // TODO: Make parameter
-    max_tf_attempts_ = 5;
+    if (!nh_.getParam("wrench_manager/max_tf_attempts", max_tf_attempts_))
+    {
+      ROS_WARN("WrenchManager: Missing max_tf_attempts parameter, setting default");
+      max_tf_attempts_ = 5;
+    }
   }
 
   WrenchManager::~WrenchManager(){}
@@ -49,7 +52,7 @@ namespace generic_control_toolbox
 
     if (attempts >= max_tf_attempts_)
     {
-      ROS_ERROR("Wrench manager could not find the transform between the sensor frame %s and gripping point %s", sensor_frame.c_str(), gripping_point_frame.c_str());
+      ROS_ERROR("WrenchManager: could not find the transform between the sensor frame %s and gripping point %s", sensor_frame.c_str(), gripping_point_frame.c_str());
       return false;
     }
 
@@ -116,7 +119,7 @@ namespace generic_control_toolbox
 
     if (sensor_num < 0)
     {
-      ROS_ERROR("Got wrench message from sensor at frame %s, which was not configured in the wrench manager", msg->header.frame_id.c_str());
+      ROS_ERROR("WrenchManager: got wrench message from sensor at frame %s, which was not configured in the wrench manager", msg->header.frame_id.c_str());
       return;
     }
 
@@ -132,13 +135,12 @@ namespace generic_control_toolbox
         return false;
       }
 
-      ROS_DEBUG("Successfully initialized wrench comms for arm %s", arm_info.name.c_str());
+      ROS_DEBUG("WrenchManager: successfully initialized wrench comms for arm %s", arm_info.name.c_str());
     }
     else
     {
-      ROS_WARN("End-effector %s has no F/T sensor.", arm_info.kdl_eef_frame.c_str());
+      ROS_WARN("WrenchManager: end-effector %s has no F/T sensor.", arm_info.kdl_eef_frame.c_str());
     }
-
 
     return true;
   }

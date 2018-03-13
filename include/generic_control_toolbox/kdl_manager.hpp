@@ -22,6 +22,8 @@
 #include <generic_control_toolbox/matrix_parser.hpp>
 #include <generic_control_toolbox/ArmInfo.h>
 
+const std::string WDLS_SOLVER("wdls"), NSO_SOLVER("nso");
+
 namespace generic_control_toolbox
 {
   /**
@@ -42,17 +44,6 @@ namespace generic_control_toolbox
       @return false if it is not possible to initialize.
     **/
     bool initializeArm(const std::string &end_effector_link);
-
-    /**
-      Initialize the kinematic chain, solvers and joint arrays for an arm defined by its end-effector link.
-      The kinematic chain is assumed to start at chain_base_link_.
-      Uses the Nso solver with a goal of avoiding joint limits.
-
-      @param end_effector_link The final link of the kinematic chain.
-      @param q_desired Desired joint positions.
-      @return false if it is not possible to initialize.
-    **/
-    bool initializeArmNso(const std::string &end_effector_link);
 
     /**
       Queries TF for the rigid transform between the end-effector link frame and
@@ -231,7 +222,7 @@ namespace generic_control_toolbox
     MatrixParser parser_;
     tf::TransformListener listener_;
     std::vector<std::vector<std::string> > actuated_joint_names_; // list of actuated joints per arm
-    std::string chain_base_link_;
+    std::string chain_base_link_, ikvel_solver_;
     double eps_, max_tf_attempts_, nso_weight_;
 
     /**
