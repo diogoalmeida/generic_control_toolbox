@@ -4,8 +4,10 @@
 #include <ros/ros.h>
 #include <Eigen/Dense>
 #include <generic_control_toolbox/manager_base.hpp>
+#include <generic_control_toolbox/matrix_parser.hpp>
 #include <tf/transform_listener.h>
 #include <kdl_conversions/kdl_msg.h>
+#include <eigen_conversions/eigen_msg.h>
 #include <tf/transform_broadcaster.h>
 #include <geometry_msgs/WrenchStamped.h>
 #include <eigen_conversions/eigen_kdl.h>
@@ -32,7 +34,7 @@ namespace generic_control_toolbox
       @param sensor_topic The wrench topic name for the desired sensor.
       @return False if something goes wrong, true otherwise.
     **/
-    bool initializeWrenchComm(const std::string &end_effector, const std::string &sensor_frame, const std::string &gripping_point_frame, const std::string &sensor_topic);
+    bool initializeWrenchComm(const std::string &end_effector, const std::string &sensor_frame, const std::string &gripping_point_frame, const std::string &sensor_topic, const std::string &calib_matrix_param);
 
     /**
       Provides access to the measured wrench at the arm's gripping point.
@@ -61,7 +63,9 @@ namespace generic_control_toolbox
     std::vector<ros::Subscriber> ft_sub_;
     std::vector<ros::Publisher> processed_ft_pub_;
     std::vector<std::string> gripping_frame_;
+    std::vector<Eigen::Matrix<double, 6, 6> > calibration_matrix_;
     tf::TransformListener listener_;
+    MatrixParser parser_;
     ros::NodeHandle nh_;
 
     /**

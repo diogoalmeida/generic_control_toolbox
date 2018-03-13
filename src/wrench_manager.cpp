@@ -14,7 +14,7 @@ namespace generic_control_toolbox
 
   WrenchManager::~WrenchManager(){}
 
-  bool WrenchManager::initializeWrenchComm(const std::string &end_effector, const std::string &sensor_frame, const std::string &gripping_point_frame, const std::string &sensor_topic)
+  bool WrenchManager::initializeWrenchComm(const std::string &end_effector, const std::string &sensor_frame, const std::string &gripping_point_frame, const std::string &sensor_topic, const std::string &calib_matrix_param)
   {
     int a;
     if (getIndex(end_effector, a))
@@ -56,8 +56,22 @@ namespace generic_control_toolbox
       return false;
     }
 
+    Eigen::MatrixXd C;
+    if (!parser_.parseMatrixData(C, calib_matrix_param, nh_))
+    {
+      ROS_ERROR("WrenchManager: missing force torque sensor calibration matrix parameter %s", calib_matrix_param.c_str());
+      return false;
+    }
+
+    if (C.cols() != 6 || C.rows() != 6)
+    {
+      ROS_ERROR("WrenchManager: calibration matrix must be 6x6. Got %ldx%ld", C.rows(), C.cols());
+      return false;
+    }
+
     // Everything is ok, can add new comm.
     KDL::Frame sensor_to_gripping_point_kdl;
+    calibration_matrix_.push_back(C);
     tf::poseMsgToKDL(sensor_to_gripping_point.pose, sensor_to_gripping_point_kdl);
     manager_index_.push_back(end_effector);
     sensor_frame_.push_back(sensor_frame);
@@ -123,14 +137,18 @@ namespace generic_control_toolbox
       return;
     }
 
-    tf::wrenchMsgToKDL(msg->wrench, measured_wrench_[sensor_num]);
+    // apply computed sensor intrinsic calibration
+    Eigen::Matrix<double, 6, 1> wrench_eig;
+    tf::wrenchMsgToEigen(msg->wrench, wrench_eig);
+    wrench_eig = calibration_matrix_[sensor_num]*wrench_eig;
+    tf::wrenchEigenToKDL(wrench_eig, measured_wrench_[sensor_num]);
   }
 
   bool setWrenchManager(const ArmInfo &arm_info, WrenchManager &manager)
   {
     if (arm_info.has_ft_sensor)
     {
-      if (!manager.initializeWrenchComm(arm_info.kdl_eef_frame, arm_info.sensor_frame, arm_info.gripping_frame, arm_info.sensor_topic))
+      if (!manager.initializeWrenchComm(arm_info.kdl_eef_frame, arm_info.sensor_frame, arm_info.gripping_frame, arm_info.sensor_topic, arm_info.name + "/sensor_calib"))
       {
         return false;
       }
