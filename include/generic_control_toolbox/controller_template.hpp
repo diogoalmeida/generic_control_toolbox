@@ -4,6 +4,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <actionlib/server/simple_action_server.h>
+#include <cmath>
 
 namespace generic_control_toolbox
 {
@@ -126,7 +127,19 @@ namespace generic_control_toolbox
       return lastState(current_state);
     }
 
-    return controlAlgorithm(current_state, dt);
+    sensor_msgs::JointState ret = controlAlgorithm(current_state, dt);
+
+    // verify sanity of values
+    for (unsigned int i = 0; i < ret.name.size(); i++)
+    {
+      if (!std::isfinite(ret.position[i]) || !std::isfinite(ret.velocity[i]))
+      {
+        ROS_ERROR("Invalid joint states in %s", action_name_.c_str());
+        return lastState(current_state);
+      }
+    }
+
+    return ret;
   }
 
   template <class ActionClass, class ActionGoal, class ActionFeedback, class ActionResult>
