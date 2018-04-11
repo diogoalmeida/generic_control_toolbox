@@ -127,6 +127,7 @@ namespace generic_control_toolbox
       return lastState(current_state);
     }
 
+    ROS_DEBUG_THROTTLE(10, "Calling %s control algorithm", action_name_.c_str());
     sensor_msgs::JointState ret = controlAlgorithm(current_state, dt);
 
     // verify sanity of values

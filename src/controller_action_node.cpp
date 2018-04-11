@@ -49,7 +49,7 @@ namespace generic_control_toolbox
       }
       else
       {
-        ROS_WARN_ONCE("No joint state received");
+        ROS_WARN_THROTTLE(10, "No joint state received");
       }
 
       prev_time = ros::Time::now();
