@@ -31,6 +31,12 @@ namespace generic_control_toolbox
   bool getArmInfo(const std::string &arm_name, ArmInfo &info)
   {
     ros::NodeHandle nh("~");
+
+    return getArmInfo(arm_name, info, nh);
+  }
+
+  bool getArmInfo(const std::string &arm_name, ArmInfo &info, ros::NodeHandle &nh)
+  {
     bool has_ft_sensor; // HACK: using the boolean in "ArmInfo" gives an rvalue assignment error that I do not understand
 
     if (!nh.getParam(arm_name + "/kdl_eef_frame", info.kdl_eef_frame))

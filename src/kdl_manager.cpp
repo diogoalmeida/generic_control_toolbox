@@ -2,15 +2,20 @@
 
 namespace generic_control_toolbox
 {
-    KDLManager::KDLManager(const std::string &chain_base_link) : chain_base_link_(chain_base_link)
+    KDLManager::KDLManager(const std::string &chain_base_link, ros::NodeHandle nh) : chain_base_link_(chain_base_link), nh_(nh)
     {
       if(!model_.initParam("/robot_description"))
       {
         throw std::runtime_error("ERROR getting robot description (/robot_description)");
       }
 
-      nh_ = ros::NodeHandle("~");
+      getParam();
+    }
 
+    KDLManager::~KDLManager() {}
+
+    bool KDLManager::getParam()
+    {
       if (!nh_.getParam("kdl_manager/eps", eps_))
       {
         ROS_WARN("KDLManager: Missing eps parameter, setting default");
@@ -44,9 +49,9 @@ namespace generic_control_toolbox
           nso_weight_ = 4;
         }
       }
-    }
 
-    KDLManager::~KDLManager() {}
+      return true;
+    }
 
     bool KDLManager::initializeArm(const std::string &end_effector_link)
     {
