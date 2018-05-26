@@ -38,6 +38,14 @@ namespace generic_control_toolbox
 
     @param arm_name The arm name used in the ros parameter server.
     @param info The ArmInfo structure to fill in.
+    @param nh The ros nodehandle
+
+    @return True for success, false otherwise
+  **/
+  bool getArmInfo(const std::string &arm_name, ArmInfo &info, ros::NodeHandle &nh);
+
+  /**
+    getArmInfo overload which creates a private nodehandle
   **/
   bool getArmInfo(const std::string &arm_name, ArmInfo &info);
 }

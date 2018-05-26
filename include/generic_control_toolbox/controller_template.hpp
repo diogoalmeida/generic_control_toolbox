@@ -8,6 +8,8 @@
 
 namespace generic_control_toolbox
 {
+  const double MAX_DT = 0.5;
+
   /**
   Defines the basic cartesian controller interface.
   **/
@@ -128,6 +130,13 @@ namespace generic_control_toolbox
     }
 
     ROS_DEBUG_THROTTLE(10, "Calling %s control algorithm", action_name_.c_str());
+    if (dt.toSec() > MAX_DT) // lost communication for too much time
+    {
+      ROS_ERROR_STREAM(action_name_ << " did not receive updates for more than " << MAX_DT << " seconds, aborting");
+      action_server_->setAborted(result_);
+      return lastState(current_state);
+    }
+
     sensor_msgs::JointState ret = controlAlgorithm(current_state, dt);
 
     // verify sanity of values
@@ -218,6 +227,8 @@ namespace generic_control_toolbox
 
     ROS_INFO("%s initialized successfully!", action_name_.c_str());
   }
+
+  typedef boost::shared_ptr<ControllerBase> BasePtr;
 }
 
 #endif

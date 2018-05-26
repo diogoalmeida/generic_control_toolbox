@@ -33,7 +33,7 @@ namespace generic_control_toolbox
   class KDLManager : public ManagerBase
   {
   public:
-    KDLManager(const std::string &chain_base_link);
+    KDLManager(const std::string &chain_base_link, ros::NodeHandle nh = ros::NodeHandle("~"));
     ~KDLManager();
 
     /**
@@ -224,6 +224,13 @@ namespace generic_control_toolbox
     std::vector<std::vector<std::string> > actuated_joint_names_; // list of actuated joints per arm
     std::string chain_base_link_, ikvel_solver_;
     double eps_, max_tf_attempts_, nso_weight_;
+
+    /**
+      Loads the manager parameters
+
+      @return False in case something goes wrong, true otherwise
+    **/
+    bool getParam();
 
     /**
       Common part of the initialize arm methods.
