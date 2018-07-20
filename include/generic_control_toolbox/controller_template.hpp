@@ -139,6 +139,11 @@ namespace generic_control_toolbox
 
     sensor_msgs::JointState ret = controlAlgorithm(current_state, dt);
 
+    if (!action_server_->isActive())
+    {
+      has_state_ = false;
+    }
+
     // verify sanity of values
     for (unsigned int i = 0; i < ret.name.size(); i++)
     {
