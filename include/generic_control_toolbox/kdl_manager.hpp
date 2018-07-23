@@ -70,7 +70,6 @@ namespace generic_control_toolbox
       taken from the joint state message.
 
       @param end_effector_link The chain's end_effector.
-      @param q The chain's joint posisitions.
       @param qdot The chain's joint velocities.
       @param state The generated joint state message.
       @return False if something goes wrong.
@@ -123,15 +122,35 @@ namespace generic_control_toolbox
     bool getGrippingTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Twist &out) const;
 
     /**
+      Verifies if a given pose is reachable by the requested end-effector.
+
+      @param end_effector_link The name of the requested end-effector.
+      @param in The pose that is to be verified.
+      @returns True if the pose is reachable, false otherwise or in case of error.
+    **/
+    bool verifyPose(const std::string &end_effector_link, const KDL::Frame &in) const;
+
+    /**
       Returns the inverse kinematics of the requested end-effector, given a desired pose.
 
       @param end_effector_link The name of the requested end-effector.
       @param state The current robot joint state.
       @param in Desired eef pose.
       @param out Joint state for the desired pose.
-      @return False in case something goes wrong, true otherwise.
+      @return False in case something goes wrong or if the solver did not converge to the desired pose, true otherwise.
     **/
     bool getPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out) const;
+
+    /**
+      Returns the forward kinematics of the requested end-effector, given a desired joint state.
+
+      @param end_effector_link The name of the requested end-effector.
+      @param state The current robot joint state.
+      @param in Desired eef joint state.
+      @param out Pose for the desired joint state.
+      @return False in case something goes wrong, true otherwise.
+    **/
+    bool getPoseFK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::JntArray &in, KDL::Frame &out) const;
 
     /**
       Returns the inverse differential kinematics of the requested gripping point, given a desired twist.
@@ -223,7 +242,7 @@ namespace generic_control_toolbox
     tf::TransformListener listener_;
     std::vector<std::vector<std::string> > actuated_joint_names_; // list of actuated joints per arm
     std::string chain_base_link_, ikvel_solver_;
-    double eps_, max_tf_attempts_, nso_weight_;
+    double eps_, max_tf_attempts_, nso_weight_, ik_pos_tolerance_, ik_angle_tolerance_;
 
     /**
       Loads the manager parameters

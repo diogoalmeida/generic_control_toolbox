@@ -34,6 +34,18 @@ namespace generic_control_toolbox
         ikvel_solver_ = WDLS_SOLVER;
       }
 
+      if (!nh_.getParam("kdl_manager/ik_angle_tolerance", ik_angle_tolerance_))
+      {
+        ROS_WARN("KDLManager: Missing ik_angle_tolerance parameter, setting default");
+        ik_angle_tolerance_ = 0.01;
+      }
+
+      if (!nh_.getParam("kdl_manager/ik_pos_tolerance", ik_pos_tolerance_))
+      {
+        ROS_WARN("KDLManager: Missing ik_pos_tolerance parameter, setting default");
+        ik_pos_tolerance_ = 0.005;
+      }
+
       if (ikvel_solver_ != WDLS_SOLVER && ikvel_solver_ != NSO_SOLVER)
       {
         ROS_ERROR_STREAM("KDLManager: ikvel_solver has value " << ikvel_solver_ << "but admissible values are " << WDLS_SOLVER << " and " << NSO_SOLVER);
@@ -483,6 +495,34 @@ namespace generic_control_toolbox
       return true;
     }
 
+    bool KDLManager::verifyPose(const std::string &end_effector_link, const KDL::Frame &in) const
+    {
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      sensor_msgs::JointState dummy_state;
+
+      for (unsigned int i = 0; i < actuated_joint_names_[arm].size(); i++)
+      {
+        dummy_state.name.push_back(actuated_joint_names_[arm][i]);
+        dummy_state.position.push_back(0);
+        dummy_state.velocity.push_back(0);
+        dummy_state.effort.push_back(0);
+      }
+
+      KDL::JntArray dummy_out(dummy_state.name.size());
+      if (getPoseIK(end_effector_link, dummy_state, in, dummy_out))
+      {
+        return true;
+      }
+
+      return false;
+    }
+
     bool KDLManager::getPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out) const
     {
       int arm;
@@ -494,6 +534,7 @@ namespace generic_control_toolbox
 
       KDL::JntArray positions(chain_[arm].getNrOfJoints());
       KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
+      KDL::Frame computedPose, difference;
       if (!getChainJointState(state, arm, positions, velocities))
       {
         return false;
@@ -501,6 +542,40 @@ namespace generic_control_toolbox
 
       out.resize(chain_[arm].getNrOfJoints());
       ikpos_[arm]->CartToJnt(positions, in, out);
+      getPoseFK(end_effector_link, state, out, computedPose); // verify if the forward kinematics of the computed solution are close to the desired pose
+
+      difference = computedPose.Inverse() * in;
+      Eigen::Vector3d quat_v;
+      double quat_w;
+
+      difference.M.GetQuaternion(quat_v[0], quat_v[1], quat_v[2], quat_w);
+      double  angle = 2*atan2(quat_v.norm(), quat_w);
+
+      if (fabs(angle) > ik_angle_tolerance_)
+      {
+        ROS_ERROR("KDL manager could not compute pose ik for end-effector %s. Final orientation error was %.2f", end_effector_link.c_str(), angle);
+        return false;
+      }
+
+      if (fabs(difference.p.Norm()) > ik_pos_tolerance_)
+      {
+        ROS_ERROR("KDL manager could not compute pose ik for end-effector %s. Final position error was %.2f", end_effector_link.c_str(), difference.p.Norm());
+        return false;
+      }
+
+      return true;
+    }
+
+    bool KDLManager::getPoseFK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::JntArray &in, KDL::Frame &out) const
+    {
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      fkpos_[arm]->JntToCart(in, out);
       return true;
     }
 
