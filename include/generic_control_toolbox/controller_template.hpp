@@ -35,6 +35,11 @@ namespace generic_control_toolbox
       @return True if active, and the controller output is to be used, False otherwise.
     **/
     virtual bool isActive() const = 0 ;
+
+    /**
+      Allows resetting the internal controller state.
+    **/
+    virtual void resetInternalState() = 0;
   };
 
   /**
@@ -54,6 +59,8 @@ namespace generic_control_toolbox
     virtual sensor_msgs::JointState updateControl(const sensor_msgs::JointState &current_state, const ros::Duration &dt);
 
     virtual bool isActive() const;
+
+    virtual void resetInternalState();
 
   protected:
     /**
@@ -106,25 +113,30 @@ namespace generic_control_toolbox
     **/
     virtual void preemptCB();
 
+    /**
+      Resets controller flags
+    **/
+    void resetFlags();
+
 
     std::string action_name_;
     ros::NodeHandle nh_;
     sensor_msgs::JointState last_state_;
-    bool has_state_;
+    bool has_state_, acquired_goal_;
   };
 
   template <class ActionClass, class ActionGoal, class ActionFeedback, class ActionResult>
   ControllerTemplate<ActionClass, ActionGoal, ActionFeedback, ActionResult>::ControllerTemplate(const std::string &action_name) : action_name_(action_name)
   {
     nh_ = ros::NodeHandle("~");
-    has_state_ = false;
+    resetFlags();
     startActionlib();
   }
 
   template <class ActionClass, class ActionGoal, class ActionFeedback, class ActionResult>
   sensor_msgs::JointState ControllerTemplate<ActionClass, ActionGoal, ActionFeedback, ActionResult>::updateControl(const sensor_msgs::JointState &current_state, const ros::Duration &dt)
   {
-    if (!action_server_->isActive())
+    if (!action_server_->isActive() || !acquired_goal_)
     {
       return lastState(current_state);
     }
@@ -138,10 +150,11 @@ namespace generic_control_toolbox
     }
 
     sensor_msgs::JointState ret = controlAlgorithm(current_state, dt);
+    action_server_->publishFeedback(feedback_);
 
     if (!action_server_->isActive())
     {
-      has_state_ = false;
+      resetInternalState();
     }
 
     // verify sanity of values
@@ -166,6 +179,20 @@ namespace generic_control_toolbox
     }
 
     return true;
+  }
+
+  template <class ActionClass, class ActionGoal, class ActionFeedback, class ActionResult>
+  void ControllerTemplate<ActionClass, ActionGoal, ActionFeedback, ActionResult>::resetInternalState()
+  {
+    resetFlags();
+    resetController();
+  }
+
+  template <class ActionClass, class ActionGoal, class ActionFeedback, class ActionResult>
+  void ControllerTemplate<ActionClass, ActionGoal, ActionFeedback, ActionResult>::resetFlags()
+  {
+    has_state_ = false;
+    acquired_goal_ = false;
   }
 
   template <class ActionClass, class ActionGoal, class ActionFeedback, class ActionResult>
@@ -202,6 +229,7 @@ namespace generic_control_toolbox
       return false;
     }
 
+    acquired_goal_ = true;
     ROS_INFO("New goal received in %s", action_name_.c_str());
     return true;
   }
@@ -211,8 +239,7 @@ namespace generic_control_toolbox
   {
     action_server_->setPreempted(result_);
     ROS_WARN("%s preempted!", action_name_.c_str());
-    has_state_ = false;
-    resetController();
+    resetInternalState();
   }
 
   template <class ActionClass, class ActionGoal, class ActionFeedback, class ActionResult>
