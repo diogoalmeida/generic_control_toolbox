@@ -582,8 +582,8 @@ namespace generic_control_toolbox
 
     bool KDLManager::getGrippingVelIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Twist &in, KDL::JntArray &out) const
     {
-      KDL::Frame eef_to_base;
-      KDL::Twist modified_in;
+      KDL::Frame gripping_to_base;
+      KDL::Twist modified_in, rotated_in;
       int arm;
 
       if (!getIndex(end_effector_link, arm))
@@ -591,12 +591,15 @@ namespace generic_control_toolbox
         return false;
       }
 
-      if (!getEefPose(end_effector_link, state, eef_to_base))
+      if (!getGrippingPoint(end_effector_link, state, gripping_to_base))
       {
         return false;
       }
 
-      modified_in = eef_to_base*eef_to_gripping_point_[arm]*in;
+      // convert the input twist (in the gripping frame) to the base frame
+      Eigen::Vector3d vel_eig, rot_eig;
+
+      modified_in = gripping_to_base.M*in;
 
       if (!getVelIK(end_effector_link, state, modified_in, out))
       {
