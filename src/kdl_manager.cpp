@@ -448,6 +448,7 @@ namespace generic_control_toolbox
         return false;
       }
 
+      q.resize(chain_[arm].getNrOfJoints());
       KDL::JntArrayVel v(q.rows());
       if (!getChainJointState(state, arm, q, v))
       {
