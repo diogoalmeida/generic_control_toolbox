@@ -238,7 +238,6 @@ namespace generic_control_toolbox
 
     urdf::Model model_;
     ros::NodeHandle nh_;
-    MatrixParser parser_;
     tf::TransformListener listener_;
     std::vector<std::vector<std::string> > actuated_joint_names_; // list of actuated joints per arm
     std::string chain_base_link_, ikvel_solver_;
