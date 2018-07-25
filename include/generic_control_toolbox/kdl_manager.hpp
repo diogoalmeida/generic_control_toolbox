@@ -157,7 +157,7 @@ namespace generic_control_toolbox
 
       @param end_effector_link The name of the requested end-effector.
       @param state The current robot joint state.
-      @param in Desired gripping point twist.
+      @param in Desired gripping point twist, in the gripping point frame.
       @param out Joint state for the desired twist.
       @return False in case something goes wrong, true otherwise.
     **/
