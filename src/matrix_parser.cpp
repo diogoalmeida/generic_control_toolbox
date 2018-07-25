@@ -5,7 +5,7 @@ namespace generic_control_toolbox
   MatrixParser::MatrixParser(){}
   MatrixParser::~MatrixParser() {}
 
-  bool MatrixParser::parseMatrixData(Eigen::MatrixXd &M, const std::string param_name, const ros::NodeHandle &n) const
+  bool MatrixParser::parseMatrixData(Eigen::MatrixXd &M, const std::string param_name, const ros::NodeHandle &n)
   {
     std::vector<double> vals;
     if(n.hasParam(param_name.c_str()))
@@ -30,7 +30,7 @@ namespace generic_control_toolbox
     return true;
   }
 
-  void MatrixParser::initializeEigenMatrix(Eigen::MatrixXd &M, const std::vector<double> &vals) const
+  void MatrixParser::initializeEigenMatrix(Eigen::MatrixXd &M, const std::vector<double> &vals)
   {
     double size_f, frac_part, discard;
     int size;
@@ -59,7 +59,7 @@ namespace generic_control_toolbox
     }
   }
 
-  Eigen::Matrix3d MatrixParser::computeSkewSymmetric(const Eigen::Vector3d &v) const
+  Eigen::Matrix3d MatrixParser::computeSkewSymmetric(const Eigen::Vector3d &v)
   {
     Eigen::Matrix3d S;
 
