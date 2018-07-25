@@ -353,7 +353,7 @@ namespace generic_control_toolbox
       rot_eig << eef_twist.GetTwist().rot.data[0], eef_twist.GetTwist().rot.data[1], eef_twist.GetTwist().rot.data[2];
       r_eig << r.data[0], r.data[1], r.data[2];
 
-      converted_vel = vel_eig - parser_.computeSkewSymmetric(r_eig)*rot_eig;
+      converted_vel = vel_eig - MatrixParser::computeSkewSymmetric(r_eig)*rot_eig;
       out.vel = KDL::Vector(converted_vel[0], converted_vel[1], converted_vel[2]);
       out.rot = eef_twist.GetTwist().rot;
 
