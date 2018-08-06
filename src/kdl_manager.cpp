@@ -62,6 +62,25 @@ namespace generic_control_toolbox
         }
       }
 
+      std::vector<double> gravity;
+      if (!nh_.getParam("kdl_manager/gravity_in_base_link", gravity))
+      {
+        ROS_WARN_STREAM("KDLManager: Missing kdl_manager/gravity_in_base_link parameter. This will affect the dynamic solvers");
+        gravity_in_chain_base_link_ = KDL::Vector(0, 0, 0);
+      }
+      else
+      {
+        if (gravity.size() != 3)
+        {
+          ROS_WARN_STREAM("KDLManager: Got gravity vector of size " << gravity.size() << ". Should have size 3");
+          gravity_in_chain_base_link_ = KDL::Vector(0, 0, 0);
+        }
+        else
+        {
+          gravity_in_chain_base_link_ = KDL::Vector(gravity[0], gravity[1], gravity[2]);
+        }
+      }
+
       return true;
     }
 
@@ -123,6 +142,8 @@ namespace generic_control_toolbox
       // Ready to accept the end-effector as valid
       manager_index_.push_back(end_effector_link);
       chain_.push_back(chain);
+      KDL::ChainDynParam dynamic_chain(chain, gravity_in_chain_base_link_);
+      dynamic_chain_.push_back(dynamic_chain);
       std::vector<std::string> new_vector;
 
       ROS_DEBUG("Initializing chain:");
@@ -266,6 +287,50 @@ namespace generic_control_toolbox
           {
             state.position[j] = q[i];
             state.velocity[j] = qdot[i];
+            found = true;
+            break;
+          }
+        }
+
+        if (!found)
+        {
+          ROS_ERROR_STREAM("KDLManager: Missing joint " << actuated_joint_names_[arm][i] << " from given joint state");
+          return false;
+        }
+      }
+
+      return true;
+    }
+
+    bool KDLManager::getJointState(const std::string &end_effector_link, const Eigen::VectorXd &q, const Eigen::VectorXd &qdot, const Eigen::VectorXd &effort, sensor_msgs::JointState &state) const
+    {
+      if (!getJointState(end_effector_link, q, qdot, state))
+      {
+        return false;
+      }
+
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      if (chain_[arm].getNrOfJoints() != effort.rows())
+      {
+        ROS_ERROR_STREAM("Joint chain for eef " << end_effector_link << " has a different number of joints than the provided");
+        return false;
+      }
+
+      bool found;
+      for (unsigned long i = 0; i < actuated_joint_names_[arm].size(); i++)
+      {
+        found = false;
+        for (unsigned long j = 0; j < state.name.size(); j++)
+        {
+          if (state.name[j] == actuated_joint_names_[arm][i])
+          {
+            state.effort[j] = effort[i];
             found = true;
             break;
           }
@@ -458,6 +523,90 @@ namespace generic_control_toolbox
       return true;
     }
 
+    bool KDLManager::getJointVelocities(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::JntArray &q_dot) const
+    {
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      q_dot.resize(chain_[arm].getNrOfJoints());
+      KDL::JntArray q(q_dot.rows());
+      KDL::JntArrayVel v(q_dot.rows());
+      if (!getChainJointState(state, arm, q, v))
+      {
+        return false;
+      }
+
+      q_dot = v.qdot;
+      return true;
+    }
+
+    bool KDLManager::getInertia(const std::string &end_effector_link, const sensor_msgs::JointState &state, Eigen::MatrixXd &H)
+    {
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      KDL::JntArray q(chain_[arm].getNrOfJoints());
+      KDL::JntSpaceInertiaMatrix B(chain_[arm].getNrOfJoints());
+      dynamic_chain_[arm].JntToMass(q, B);
+
+      H = B.data;
+      return true;
+    }
+
+    bool KDLManager::getGravity(const std::string &end_effector_link, const sensor_msgs::JointState &state, Eigen::MatrixXd &g)
+    {
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      KDL::JntArray q(chain_[arm].getNrOfJoints());
+      KDL::JntArrayVel q_dot(chain_[arm].getNrOfJoints());
+      if (!getChainJointState(state, arm, q, q_dot))
+      {
+        return false;
+      }
+
+      KDL::JntArray q_gravity(chain_[arm].getNrOfJoints());
+      dynamic_chain_[arm].JntToGravity(q, q_gravity);
+
+      g = q_gravity.data;
+
+      return true;
+    }
+
+    bool KDLManager::getCoriolis(const std::string &end_effector_link, const sensor_msgs::JointState &state, Eigen::MatrixXd &coriolis)
+    {
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      KDL::JntArray q(chain_[arm].getNrOfJoints());
+      KDL::JntArrayVel q_dot(chain_[arm].getNrOfJoints());
+      if (!getChainJointState(state, arm, q, q_dot))
+      {
+        return false;
+      }
+
+      KDL::JntArray cor(chain_[arm].getNrOfJoints());
+      dynamic_chain_[arm].JntToCoriolis(q, q_dot.qdot, cor);
+      coriolis = cor.data;
+      return true;
+    }
+
     bool KDLManager::getRigidTransform(const std::string &base_frame, const std::string &target_frame, KDL::Frame &out) const
     {
       geometry_msgs::PoseStamped base_to_target;
@@ -646,6 +795,7 @@ namespace generic_control_toolbox
         return false;
       }
 
+      out.resize(positions.rows());
       jac_solver_[arm]->JntToJac(positions, out);
       return true;
     }

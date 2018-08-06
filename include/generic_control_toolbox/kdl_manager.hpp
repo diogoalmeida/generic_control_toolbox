@@ -15,6 +15,7 @@
 #include <tf/transform_listener.h>
 #include <kdl_parser/kdl_parser.hpp>
 #include <kdl/kdl.hpp>
+#include <kdl/chaindynparam.hpp>
 #include <urdf/model.h>
 #include <kdl/frames.hpp>
 #include <stdexcept>
@@ -87,6 +88,19 @@ namespace generic_control_toolbox
       @return False if something goes wrong.
     **/
     bool getJointState(const std::string &end_effector_link, const Eigen::VectorXd &q, const Eigen::VectorXd &qdot, sensor_msgs::JointState &state) const;
+
+    /**
+      Fills the joint state message appropriately given the joint
+      positions, velocities and efforts of the selected end-effector's joint chain.
+
+      @param end_effector_link The chain's end_effector.
+      @param q The chain's joint posisitions.
+      @param qdot The chain's joint velocities.
+      @param effort The chain's joint efforts.
+      @param state The generated joint state message.
+      @return False if something goes wrong.
+    **/
+    bool getJointState(const std::string &end_effector_link, const Eigen::VectorXd &q, const Eigen::VectorXd &qdot, const Eigen::VectorXd &effort, sensor_msgs::JointState &state) const;
 
     /**
       Returns the gripping point of the chosen arm.
@@ -226,6 +240,46 @@ namespace generic_control_toolbox
     **/
     bool getJointPositions(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::JntArray &q) const;
 
+    /**
+      Returns the current joint velocities in the KDL format.
+
+      @param end_effector_link The name of the requested end-effector.
+      @param state The current joint state.
+      @param q_dot The joint velocities in the KDL format.
+      @returns False in case something goes wrong, true otherwise.
+    **/
+    bool getJointVelocities(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::JntArray &q_dot) const;
+
+    /**
+      Computes the inertia matrix of the kinematic chain.
+
+      @param end_effector_link The name of the requested end-effector.
+      @param state The current joint state.
+      @param H The output inertia matrix.
+      @returns False in case something goes wrong, true otherwise.
+    **/
+    bool getInertia(const std::string &end_effector_link, const sensor_msgs::JointState &state, Eigen::MatrixXd &H);
+
+    /**
+      Computes the predicted gravity effect on the given chain.
+
+      @param end_effector_link The name of the requested end-effector.
+      @param state The current joint state.
+      @param g The output gravity effort.
+      @returns False in case something goes wrong, true otherwise.
+    **/
+    bool getGravity(const std::string &end_effector_link, const sensor_msgs::JointState &state, Eigen::MatrixXd &g);
+
+    /**
+      Computes the coriolis forces exerted in the given chain.
+
+      @param end_effector_link The name of the requested end-effector.
+      @param state The current joint state.
+      @param coriolis The output coriolis effort.
+      @returns False in case something goes wrong, true otherwise.
+    **/
+    bool getCoriolis(const std::string &end_effector_link, const sensor_msgs::JointState &state, Eigen::MatrixXd &coriolis);
+
   private:
     std::vector<std::shared_ptr<KDL::ChainIkSolverVel> > ikvel_;
     std::vector<std::shared_ptr<KDL::ChainIkSolverPos_LMA> > ikpos_;
@@ -235,11 +289,13 @@ namespace generic_control_toolbox
     std::vector<KDL::Frame> eef_to_gripping_point_;
     std::vector<KDL::Frame> eef_to_sensor_point_;
     std::vector<KDL::Chain> chain_;
+    std::vector<KDL::ChainDynParam> dynamic_chain_;
 
     urdf::Model model_;
     ros::NodeHandle nh_;
     tf::TransformListener listener_;
-    std::vector<std::vector<std::string> > actuated_joint_names_; // list of actuated joints per arm
+    KDL::Vector gravity_in_chain_base_link_;
+    std::vector<std::vector<std::string> > actuated_joint_names_; /// list of actuated joints per arm
     std::string chain_base_link_, ikvel_solver_;
     double eps_, max_tf_attempts_, nso_weight_, ik_pos_tolerance_, ik_angle_tolerance_;
 
