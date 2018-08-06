@@ -8,11 +8,11 @@ find_package(
   visualization_msgs
   cmake_modules
   eigen_conversions
-	kdl_parser
-	sensor_msgs
-	tf_conversions
-	realtime_tools
-	tf
+  kdl_parser
+  sensor_msgs
+  tf_conversions
+  realtime_tools
+  tf
 )
 
 add_definitions(-std=c++11)
@@ -20,7 +20,7 @@ link_directories(${catkin_LIBRARY_DIRS})
 
 add_message_files(
   FILES
-	ArmInfo.msg
+  ArmInfo.msg
 )
 
 # add_action_files(
@@ -30,7 +30,7 @@ add_message_files(
 
 generate_messages(
   DEPENDENCIES
-	actionlib_msgs
+  actionlib_msgs
   geometry_msgs
 )
 
