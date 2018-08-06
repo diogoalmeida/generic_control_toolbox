@@ -4,6 +4,8 @@ project(generic_control_toolbox)
 find_package(
   catkin REQUIRED COMPONENTS
   roscpp
+  rospy
+  actionlib
   geometry_msgs
   visualization_msgs
   cmake_modules
@@ -14,6 +16,8 @@ find_package(
   realtime_tools
   tf
 )
+
+catkin_python_setup()
 
 add_definitions(-std=c++11)
 link_directories(${catkin_LIBRARY_DIRS})
@@ -35,7 +39,7 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp geometry_msgs cmake_modules eigen_conversions kdl_parser sensor_msgs tf_conversions tf visualization_msgs realtime_tools
+  CATKIN_DEPENDS roscpp rospy actionlib geometry_msgs visualization_msgs cmake_modules eigen_conversions kdl_parser sensor_msgs tf_conversions realtime_tools tf 
   INCLUDE_DIRS include
   LIBRARIES matrix_parser kdl_manager wrench_manager controller_template marker_manager controller_action_node
 )
@@ -68,3 +72,5 @@ add_dependencies(controller_template ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME
 add_library(controller_action_node src/controller_action_node.cpp)
 target_link_libraries(controller_action_node ${catkin_LIBRARIES})
 add_dependencies(controller_action_node ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+install(PROGRAMS src/manage_actionlib.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
