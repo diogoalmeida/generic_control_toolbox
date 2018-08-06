@@ -161,11 +161,10 @@ namespace generic_control_toolbox
       }
 
       actuated_joint_names_.push_back(new_vector);
-
       // Initialize solvers
       fkpos_.push_back(std::shared_ptr<KDL::ChainFkSolverPos_recursive>(new KDL::ChainFkSolverPos_recursive(chain_.back())));
       fkvel_.push_back(std::shared_ptr<KDL::ChainFkSolverVel_recursive>(new KDL::ChainFkSolverVel_recursive(chain_.back())));
-      ikpos_.push_back(std::shared_ptr<KDL::ChainIkSolverPos_LMA>(new KDL::ChainIkSolverPos_LMA(chain_.back())));
+      ikpos_.push_back(std::shared_ptr<TRAC_IK::TRAC_IK>(new TRAC_IK::TRAC_IK(chain_base_link_, end_effector_link)));
       eef_to_gripping_point_.push_back(KDL::Frame::Identity()); // Initialize a neutral transform.
       eef_to_sensor_point_.push_back(KDL::Frame::Identity()); // Initialize a neutral transform.
       jac_solver_.push_back(std::shared_ptr<KDL::ChainJntToJacSolver>(new KDL::ChainJntToJacSolver(chain_.back())));

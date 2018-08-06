@@ -7,6 +7,7 @@
 #include <kdl_conversions/kdl_msg.h>
 #include <kdl/chainiksolvervel_wdls.hpp>
 #include <kdl/chainiksolvervel_pinv_nso.hpp>
+#include <trac_ik/trac_ik.hpp>
 #include <kdl/chainiksolverpos_lma.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainfksolvervel_recursive.hpp>
@@ -282,7 +283,7 @@ namespace generic_control_toolbox
 
   private:
     std::vector<std::shared_ptr<KDL::ChainIkSolverVel> > ikvel_;
-    std::vector<std::shared_ptr<KDL::ChainIkSolverPos_LMA> > ikpos_;
+    std::vector<std::shared_ptr<TRAC_IK::TRAC_IK> > ikpos_;
     std::vector<std::shared_ptr<KDL::ChainFkSolverPos_recursive> > fkpos_;
     std::vector<std::shared_ptr<KDL::ChainFkSolverVel_recursive> > fkvel_;
     std::vector<std::shared_ptr<KDL::ChainJntToJacSolver> > jac_solver_;
