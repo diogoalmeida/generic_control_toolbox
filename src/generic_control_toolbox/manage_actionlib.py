@@ -8,7 +8,7 @@ import actionlib
     This module provides utility methods for setting up actionlib calls through an overarching actionlib server.
 """
 
-def monitor_action_goal(action_server, action_client, action_goal, action_name = "current action", time_limit = float("inf")):
+def monitor_action_goal(action_server, action_client, action_goal, action_name = "current action", time_limit = float("inf"), abort_on_fail = False):
     """Send and monitor an action goal to a given action client.
 
        The monitor will return in case of the client reporting success, preemption or
@@ -27,9 +27,9 @@ def monitor_action_goal(action_server, action_client, action_goal, action_name =
     init_time = rospy.Time.now()
     while action_server.is_active():
        if (rospy.Time.now() - init_time).to_sec() > time_limit:
-           rospy.logwarn("Timeout of request, preempting but continuing")
+           rospy.logwarn("Timeout of request")
            action_client.cancel_goal()
-           success = True
+           success = False
            break
 
        if action_server.is_preempt_requested():
@@ -48,13 +48,15 @@ def monitor_action_goal(action_server, action_client, action_goal, action_name =
        if action_client.get_state() == actionlib.GoalStatus.ABORTED:
         rospy.logerr(action_name + " aborted!")
         success = False
-        action_server.set_aborted(text = action_name + " aborted")
+        if abort_on_fail:
+            action_server.set_aborted(text = action_name + " aborted")
         break
 
        if action_client.get_state() == actionlib.GoalStatus.PREEMPTED:
         rospy.logerr(action_name + " preempted!")
         success = False
-        action_server.set_aborted(text = action_name + " was preempted")
+        if abort_on_fail:
+            action_server.set_aborted(text = action_name + " was preempted")
         break
 
        if action_client.get_state() == actionlib.GoalStatus.SUCCEEDED:
