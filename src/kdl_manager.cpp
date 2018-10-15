@@ -722,7 +722,6 @@ namespace generic_control_toolbox
       return true;
     }
 
-<<<<<<< HEAD
     bool KDLManager::getGrippingPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out) const
     {
       int arm;
@@ -737,8 +736,6 @@ namespace generic_control_toolbox
       return getPoseIK(end_effector_link, state, pose_in_eef, out);
     }
 
-=======
->>>>>>> fe66284cabfccedda3b90bb9cafe5771843ec68d
     bool KDLManager::getPoseFK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::JntArray &in, KDL::Frame &out) const
     {
       int arm;
