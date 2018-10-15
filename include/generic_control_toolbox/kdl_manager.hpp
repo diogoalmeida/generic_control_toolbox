@@ -174,6 +174,7 @@ namespace generic_control_toolbox
     bool getPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out) const;
 
     /**
+<<<<<<< HEAD
       Returns the inverse kinematics of a chain gripping point , given a desired pose.
 
       @param end_effector_link The name of the requested end-effector.
@@ -185,6 +186,8 @@ namespace generic_control_toolbox
     bool getGrippingPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out) const;
 
     /**
+=======
+>>>>>>> fe66284cabfccedda3b90bb9cafe5771843ec68d
       Returns the forward kinematics of the requested end-effector, given a desired joint state.
 
       @param end_effector_link The name of the requested end-effector.
