@@ -48,6 +48,24 @@ namespace generic_control_toolbox
     bool initializeArm(const std::string &end_effector_link);
 
     /**
+      Checks whether a kinematic chain with the given end-effector link was initialized in a KDL manager instance.
+
+      @param end_effector_link The final link of the kinematic chain.
+      @return False if the chain is not initialized, true otherwise.
+    **/
+    bool isInitialized(const std::string &end_effector_link) const;
+
+    /**
+      Checks if the provided joint state message has the required information for the kinematic chain
+      indexed by the given end effector link. Useful with the joint states topic does not contain consistently the
+      same information.
+
+      @param end_effector_link The end_effector link name.
+      @param state The joint state message to verify.
+      @returns True if the joint state message contains valid information for the requested chain, false otherwise.
+    **/
+    bool checkStateMessage(const std::string &end_effector_link, const sensor_msgs::JointState &state) const;
+    /**
       Queries TF for the rigid transform between the end-effector link frame and
       the gripping point frame and stores it as a KDL Frame.
 
@@ -59,7 +77,7 @@ namespace generic_control_toolbox
 
     /**
       Queries TF for the rigid transform between the end-effector link frame and
-      the gripping point frame, and stores it as a KDL Frame.
+      a sensor point frame, and stores it as a KDL Frame.
 
       @param end_effector_link The end-effector link name.
       @param sensor_point_frame TF name of the sensor point frame.
@@ -157,6 +175,20 @@ namespace generic_control_toolbox
     bool getPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out) const;
 
     /**
+<<<<<<< HEAD
+      Returns the inverse kinematics of a chain gripping point , given a desired pose.
+
+      @param end_effector_link The name of the requested end-effector.
+      @param state The current robot joint state.
+      @param in Desired eef pose.
+      @param out Joint state for the desired gripping pose.
+      @return False in case something goes wrong or if the solver did not converge to the desired pose, true otherwise.
+    **/
+    bool getGrippingPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out) const;
+
+    /**
+=======
+>>>>>>> fe66284cabfccedda3b90bb9cafe5771843ec68d
       Returns the forward kinematics of the requested end-effector, given a desired joint state.
 
       @param end_effector_link The name of the requested end-effector.
