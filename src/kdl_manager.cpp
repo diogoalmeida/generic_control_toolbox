@@ -105,16 +105,25 @@ namespace generic_control_toolbox
       else
       {
         unsigned int joint_n = chain_[arm].getNrOfJoints();
-        KDL::JntArray w(joint_n), q_min(joint_n), q_max(joint_n), q_vel_lim(joint_n), q_desired(joint_n);
-        getJointLimits(end_effector_link, q_min, q_max, q_vel_lim);
 
-        for (unsigned int i = 0; i < joint_n; i++)
+        if (joint_n < 6)
         {
-          w(i) = nso_weight_;
-          q_desired(i) = (q_max(i) + q_min(i))/2;
+          ROS_WARN("Number of joints for kinematic chain is smaller than 6 (%d). The NSO ik solver vel has issues with under-actuated chains. Using WDLS", joint_n);
+          ikvel_.push_back(std::shared_ptr<KDL::ChainIkSolverVel_wdls>(new KDL::ChainIkSolverVel_wdls(chain_[arm], eps_)));
         }
+        else
+        {
+          KDL::JntArray w(joint_n), q_min(joint_n), q_max(joint_n), q_vel_lim(joint_n), q_desired(joint_n);
+          getJointLimits(end_effector_link, q_min, q_max, q_vel_lim);
 
-        ikvel_.push_back(std::shared_ptr<KDL::ChainIkSolverVel_pinv_nso>(new KDL::ChainIkSolverVel_pinv_nso(chain_[arm], q_desired, w, eps_)));
+          for (unsigned int i = 0; i < joint_n; i++)
+          {
+            w(i) = nso_weight_;
+            q_desired(i) = (q_max(i) + q_min(i))/2;
+          }
+
+          ikvel_.push_back(std::shared_ptr<KDL::ChainIkSolverVel_pinv_nso>(new KDL::ChainIkSolverVel_pinv_nso(chain_[arm], q_desired, w, eps_)));
+        }
       }
 
       return true;
