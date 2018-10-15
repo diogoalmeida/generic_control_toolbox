@@ -2,7 +2,7 @@
 <package format="2">
   <name>generic_control_toolbox</name>
   <version>0.1.0</version>
-  <description>Implements libraries useful for implementing controllers for robotic manipulators.</description>
+  <description>Implements libraries useful for developing controllers for robotic manipulators.</description>
   <author email="diogoa@kth.se">diogo</author>
   <maintainer email="diogoa@kth.se">diogo</maintainer>
   <license>MIT</license>
