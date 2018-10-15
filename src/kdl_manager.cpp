@@ -120,6 +120,12 @@ namespace generic_control_toolbox
       return true;
     }
 
+    bool KDLManager::isInitialized(const std::string &end_effector_link) const
+    {
+      int arm;
+      return getIndex(end_effector_link, arm);
+    }
+
     bool KDLManager::initializeArmCommon(const std::string &end_effector_link)
     {
       int a;
@@ -716,6 +722,20 @@ namespace generic_control_toolbox
       return true;
     }
 
+    bool KDLManager::getGrippingPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out) const
+    {
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      KDL::Frame pose_in_eef = in*eef_to_gripping_point_[arm].Inverse();
+
+      return getPoseIK(end_effector_link, state, pose_in_eef, out);
+    }
+
     bool KDLManager::getPoseFK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::JntArray &in, KDL::Frame &out) const
     {
       int arm;
@@ -797,6 +817,45 @@ namespace generic_control_toolbox
 
       out.resize(positions.rows());
       jac_solver_[arm]->JntToJac(positions, out);
+      return true;
+    }
+
+    bool KDLManager::checkStateMessage(const std::string &end_effector_link, const sensor_msgs::JointState &state) const
+    {
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      unsigned int processed_joints = 0, name_size, pos_size, vel_size;
+      name_size = state.name.size();
+      pos_size = state.position.size();
+      vel_size = state.velocity.size();
+
+      if (name_size != pos_size || name_size != vel_size)
+      {
+        ROS_ERROR("Got joint state where the name, position and velocity dimensions (resp. %d, %d, %d) are different", name_size, pos_size, vel_size);
+        return false;
+      }
+
+      for (unsigned long i = 0; i < actuated_joint_names_[arm].size(); i++)
+      {
+        for (unsigned long j = 0; j < state.name.size(); j++)
+        {
+          if (actuated_joint_names_[arm][i] == state.name[j])
+          {
+            processed_joints++;
+          }
+        }
+      }
+
+      if (processed_joints != actuated_joint_names_[arm].size())
+      {
+        return false;
+      }
+
       return true;
     }
 
