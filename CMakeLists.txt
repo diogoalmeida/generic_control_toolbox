@@ -73,4 +73,4 @@ add_library(controller_action_node src/controller_action_node.cpp)
 target_link_libraries(controller_action_node ${catkin_LIBRARIES})
 add_dependencies(controller_action_node ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-install(PROGRAMS src/manage_actionlib.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+install(PROGRAMS src/generic_control_toolbox/manage_actionlib.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
