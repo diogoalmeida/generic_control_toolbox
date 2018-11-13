@@ -310,6 +310,15 @@ namespace generic_control_toolbox
     **/
     bool getCoriolis(const std::string &end_effector_link, const sensor_msgs::JointState &state, Eigen::MatrixXd &coriolis);
 
+    /**
+      Returns the number of joints for a given chain.
+
+      @param end_effector_link The name of the requested end-effector.
+      @param num_joints The number of joints of the associated kinematic chain.
+      @returns False in case something goes wrong, true otherwise.
+    **/
+    bool getNumJoints(const std::string &end_effector_link, unsigned int &num_joints) const;
+
   private:
     std::vector<std::shared_ptr<KDL::ChainIkSolverVel> > ikvel_;
     std::vector<std::shared_ptr<TRAC_IK::TRAC_IK> > ikpos_;
