@@ -919,6 +919,19 @@ namespace generic_control_toolbox
       return false;
     }
 
+    bool KDLManager::getNumJoints(const std::string &end_effector_link, unsigned int &num_joints) const
+    {
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      num_joints = chain_[arm].getNrOfJoints();
+      return true;
+    }
+
     bool setKDLManager(const ArmInfo &arm_info, std::shared_ptr<KDLManager> manager)
     {
       if(!manager->initializeArm(arm_info.kdl_eef_frame))
