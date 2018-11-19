@@ -269,6 +269,7 @@ namespace generic_control_toolbox
       @return False in case something goes wrong, true otherwise.
     **/
     bool getJointPositions(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::JntArray &q) const;
+    bool getJointPositions(const std::string &end_effector_link, const sensor_msgs::JointState &state, Eigen::VectorXd &q) const;
 
     /**
       Returns the current joint velocities in the KDL format.

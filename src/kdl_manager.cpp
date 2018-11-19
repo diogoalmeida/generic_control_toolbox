@@ -537,6 +537,26 @@ namespace generic_control_toolbox
       return true;
     }
 
+    bool KDLManager::getJointPositions(const std::string &end_effector_link, const sensor_msgs::JointState &state, Eigen::VectorXd &q) const
+    {
+      int arm;
+
+      if (!getIndex(end_effector_link, arm))
+      {
+        return false;
+      }
+
+      KDL::JntArray q_kdl;
+
+      if (!getJointPositions(end_effector_link, state, q_kdl))
+      {
+        return false;
+      }
+
+      q = q_kdl.data;
+      return true;
+    }
+
     bool KDLManager::getJointVelocities(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::JntArray &q_dot) const
     {
       int arm;
