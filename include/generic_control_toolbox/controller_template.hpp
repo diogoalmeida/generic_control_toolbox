@@ -155,6 +155,7 @@ namespace generic_control_toolbox
     if (!action_server_->isActive())
     {
       resetInternalState();
+      return lastState(current_state);
     }
 
     // verify sanity of values
