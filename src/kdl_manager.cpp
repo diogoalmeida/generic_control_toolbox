@@ -497,8 +497,8 @@ namespace generic_control_toolbox
         return false;
       }
 
-      boost::shared_ptr<const urdf::Joint> joint;
-      boost::shared_ptr<urdf::JointLimits> limits;
+      urdf::JointConstSharedPtr joint;
+      urdf::JointLimitsSharedPtr limits;
       int j = 0;
       // run through the kinematic chain joints and get the limits from the urdf model
       for (unsigned int i = 0; i < chain_[arm].getNrOfSegments(); i++)
