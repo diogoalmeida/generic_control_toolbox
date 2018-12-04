@@ -91,25 +91,23 @@ namespace generic_control_toolbox
         return false;
       }
 
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
       if (ikvel_solver_ == WDLS_SOLVER)
       {
-        ikvel_.push_back(std::shared_ptr<KDL::ChainIkSolverVel_wdls>(new KDL::ChainIkSolverVel_wdls(chain_[arm], eps_)));
+        ikvel_[end_effector_link] = IkSolverVelPtr(new KDL::ChainIkSolverVel_wdls(chain_.at(end_effector_link), eps_));
       }
       else
       {
-        unsigned int joint_n = chain_[arm].getNrOfJoints();
+        unsigned int joint_n = chain_.at(end_effector_link).getNrOfJoints();
 
         if (joint_n < 6)
         {
           ROS_WARN("Number of joints for kinematic chain is smaller than 6 (%d). The NSO ik solver vel has issues with under-actuated chains. Using WDLS", joint_n);
-          ikvel_.push_back(std::shared_ptr<KDL::ChainIkSolverVel_wdls>(new KDL::ChainIkSolverVel_wdls(chain_[arm], eps_)));
+          ikvel_[end_effector_link] = IkSolverVelPtr(new KDL::ChainIkSolverVel_wdls(chain_.at(end_effector_link), eps_));
         }
         else
         {
@@ -122,7 +120,7 @@ namespace generic_control_toolbox
             q_desired(i) = (q_max(i) + q_min(i))/2;
           }
 
-          ikvel_.push_back(std::shared_ptr<KDL::ChainIkSolverVel_pinv_nso>(new KDL::ChainIkSolverVel_pinv_nso(chain_[arm], q_desired, w, eps_)));
+          ikvel_[end_effector_link] = IkSolverVelPtr(new KDL::ChainIkSolverVel_pinv_nso(chain_.at(end_effector_link), q_desired, w, eps_));
         }
       }
 
@@ -131,14 +129,12 @@ namespace generic_control_toolbox
 
     bool KDLManager::isInitialized(const std::string &end_effector_link) const
     {
-      int arm;
-      return getIndex(end_effector_link, arm);
+      return (chain_.find(end_effector_link) != chain_.end());
     }
 
     bool KDLManager::initializeArmCommon(const std::string &end_effector_link)
     {
-      int a;
-      if(getIndex(end_effector_link, a))
+      if (chain_.find(end_effector_link) != chain_.end())
       {
         ROS_ERROR_STREAM("Tried to initialize arm " << end_effector_link << ", but it was already initialized");
         return false;
@@ -155,13 +151,11 @@ namespace generic_control_toolbox
       }
 
       // Ready to accept the end-effector as valid
-      manager_index_.push_back(end_effector_link);
-      chain_.push_back(chain);
-      KDL::ChainDynParam dynamic_chain(chain, gravity_in_chain_base_link_);
-      dynamic_chain_.push_back(dynamic_chain);
+      chain_[end_effector_link] = chain;
+      dynamic_chain_[end_effector_link] = ChainDynParamPtr(new KDL::ChainDynParam(chain_.at(end_effector_link), gravity_in_chain_base_link_));
       std::vector<std::string> new_vector;
 
-      ROS_DEBUG("Initializing chain:");
+      ROS_DEBUG_STREAM("Initializing chain for arm " << end_effector_link);
       for (unsigned int i = 0; i < chain.getNrOfSegments(); i++) // check for non-movable joints
       {
         kdl_joint = chain.getSegment(i).getJoint();
@@ -175,23 +169,22 @@ namespace generic_control_toolbox
         new_vector.push_back(kdl_joint.getName());
       }
 
-      actuated_joint_names_.push_back(new_vector);
+      actuated_joint_names_[end_effector_link] = new_vector;
+
       // Initialize solvers
-      fkpos_.push_back(std::shared_ptr<KDL::ChainFkSolverPos_recursive>(new KDL::ChainFkSolverPos_recursive(chain_.back())));
-      fkvel_.push_back(std::shared_ptr<KDL::ChainFkSolverVel_recursive>(new KDL::ChainFkSolverVel_recursive(chain_.back())));
-      ikpos_.push_back(std::shared_ptr<TRAC_IK::TRAC_IK>(new TRAC_IK::TRAC_IK(chain_base_link_, end_effector_link)));
-      eef_to_gripping_point_.push_back(KDL::Frame::Identity()); // Initialize a neutral transform.
-      eef_to_sensor_point_.push_back(KDL::Frame::Identity()); // Initialize a neutral transform.
-      jac_solver_.push_back(std::shared_ptr<KDL::ChainJntToJacSolver>(new KDL::ChainJntToJacSolver(chain_.back())));
+      fkpos_[end_effector_link] = FkSolverPosPtr(new FkSolverPos(chain_.at(end_effector_link)));
+      fkvel_[end_effector_link] = FkSolverVelPtr(new FkSolverVel(chain_.at(end_effector_link)));
+      ikpos_[end_effector_link] = IkSolverPosPtr(new IkSolverPos(chain_.at(end_effector_link)));
+      jac_solver_[end_effector_link] = JacSolverPtr(new JacSolver(chain_.at(end_effector_link)));
+      eef_to_gripping_point_[end_effector_link] = KDL::Frame::Identity(); // Initialize a neutral transform.
+      eef_to_sensor_point_[end_effector_link] = KDL::Frame::Identity(); // Initialize a neutral transform.
 
       return true;
     }
 
     bool KDLManager::setGrippingPoint(const std::string &end_effector_link, const std::string &gripping_point_frame)
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
@@ -203,16 +196,14 @@ namespace generic_control_toolbox
         return false;
       }
 
-      eef_to_gripping_point_[arm] = eef_to_gripping_point.Inverse();
+      eef_to_gripping_point_.at(end_effector_link) = eef_to_gripping_point.Inverse();
       return true;
 
     }
 
     bool KDLManager::setSensorPoint(const std::string &end_effector_link, const std::string &sensor_point_frame)
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
@@ -224,43 +215,41 @@ namespace generic_control_toolbox
         return false;
       }
 
-      eef_to_sensor_point_[arm] = eef_to_sensor_point;
+      eef_to_sensor_point_.at(end_effector_link) = eef_to_sensor_point;
       return true;
     }
 
     bool KDLManager::getJointState(const std::string &end_effector_link, const Eigen::VectorXd &qdot, sensor_msgs::JointState &state) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      if (chain_[arm].getNrOfJoints() != qdot.rows())
+      if (chain_.at(end_effector_link).getNrOfJoints() != qdot.rows())
       {
         ROS_ERROR("Joint chain for eef %s has a different number of joints than the provided", end_effector_link.c_str());
         return false;
       }
 
-      Eigen::VectorXd q(chain_[arm].getNrOfJoints());
+      Eigen::VectorXd q(chain_.at(end_effector_link).getNrOfJoints());
       int joint_index = 0;
 
       for (unsigned long i = 0; i < state.name.size(); i++)
       {
-        if (hasJoint(chain_[arm], state.name[i]))
+        if (hasJoint(chain_.at(end_effector_link), state.name[i]))
         {
           q[joint_index] = state.position[i];
           joint_index++;
         }
 
-        if (joint_index == chain_[arm].getNrOfJoints())
+        if (joint_index == chain_.at(end_effector_link).getNrOfJoints())
         {
           break;
         }
       }
 
-      if (joint_index != chain_[arm].getNrOfJoints())
+      if (joint_index != chain_.at(end_effector_link).getNrOfJoints())
       {
         ROS_ERROR("Provided joint state does not have all of the required chain joints");
         return false;
@@ -277,14 +266,12 @@ namespace generic_control_toolbox
         return false;
       }
 
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      if (chain_[arm].getNrOfJoints() != qdot.rows())
+      if (chain_.at(end_effector_link).getNrOfJoints() != qdot.rows())
       {
         ROS_ERROR("Joint chain for eef %s has a different number of joints than the provided", end_effector_link.c_str());
         return false;
@@ -292,12 +279,12 @@ namespace generic_control_toolbox
 
       bool found;
 
-      for (unsigned long i = 0; i < actuated_joint_names_[arm].size(); i ++)
+      for (unsigned long i = 0; i < actuated_joint_names_.at(end_effector_link).size(); i ++)
       {
         found = false;
         for (unsigned long j = 0; j < state.name.size(); j++)
         {
-          if (state.name[j] == actuated_joint_names_[arm][i])
+          if (state.name[j] == actuated_joint_names_.at(end_effector_link)[i])
           {
             state.position[j] = q[i];
             state.velocity[j] = qdot[i];
@@ -308,7 +295,7 @@ namespace generic_control_toolbox
 
         if (!found)
         {
-          ROS_ERROR_STREAM("KDLManager: Missing joint " << actuated_joint_names_[arm][i] << " from given joint state");
+          ROS_ERROR_STREAM("KDLManager: Missing joint " << actuated_joint_names_.at(end_effector_link)[i] << " from given joint state");
           return false;
         }
       }
@@ -323,26 +310,24 @@ namespace generic_control_toolbox
         return false;
       }
 
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      if (chain_[arm].getNrOfJoints() != effort.rows())
+      if (chain_.at(end_effector_link).getNrOfJoints() != effort.rows())
       {
         ROS_ERROR_STREAM("Joint chain for eef " << end_effector_link << " has a different number of joints than the provided");
         return false;
       }
 
       bool found;
-      for (unsigned long i = 0; i < actuated_joint_names_[arm].size(); i++)
+      for (unsigned long i = 0; i < actuated_joint_names_.at(end_effector_link).size(); i++)
       {
         found = false;
         for (unsigned long j = 0; j < state.name.size(); j++)
         {
-          if (state.name[j] == actuated_joint_names_[arm][i])
+          if (state.name[j] == actuated_joint_names_.at(end_effector_link)[i])
           {
             state.effort[j] = effort[i];
             found = true;
@@ -352,7 +337,7 @@ namespace generic_control_toolbox
 
         if (!found)
         {
-          ROS_ERROR_STREAM("KDLManager: Missing joint " << actuated_joint_names_[arm][i] << " from given joint state");
+          ROS_ERROR_STREAM("KDLManager: Missing joint " << actuated_joint_names_.at(end_effector_link)[i] << " from given joint state");
           return false;
         }
       }
@@ -362,9 +347,7 @@ namespace generic_control_toolbox
 
     bool KDLManager::getGrippingPoint(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
@@ -375,15 +358,13 @@ namespace generic_control_toolbox
         return false;
       }
 
-      out = eef_pose*eef_to_gripping_point_[arm];
+      out = eef_pose*eef_to_gripping_point_.at(end_effector_link);
       return true;
     }
 
     bool KDLManager::getSensorPoint(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
@@ -394,15 +375,13 @@ namespace generic_control_toolbox
         return false;
       }
 
-      out = eef_pose*eef_to_sensor_point_[arm];
+      out = eef_pose*eef_to_sensor_point_.at(end_effector_link);
       return true;
     }
 
     bool KDLManager::getGrippingTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Twist &out) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
@@ -441,55 +420,49 @@ namespace generic_control_toolbox
 
     bool KDLManager::getEefPose(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Frame &out) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      KDL::JntArray positions(chain_[arm].getNrOfJoints());
-      KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
+      KDL::JntArray positions(chain_.at(end_effector_link).getNrOfJoints());
+      KDL::JntArrayVel velocities(chain_.at(end_effector_link).getNrOfJoints());
 
-      if (!getChainJointState(state, arm, positions, velocities))
+      if (!getChainJointState(state, end_effector_link, positions, velocities))
       {
         return false;
       }
 
-      fkpos_[arm]->JntToCart(positions, out);
+      fkpos_.at(end_effector_link)->JntToCart(positions, out);
       return true;
     }
 
     bool KDLManager::getEefTwist(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::FrameVel &out) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      KDL::JntArray positions(chain_[arm].getNrOfJoints());
-      KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
-      if (!getChainJointState(state, arm, positions, velocities))
+      KDL::JntArray positions(chain_.at(end_effector_link).getNrOfJoints());
+      KDL::JntArrayVel velocities(chain_.at(end_effector_link).getNrOfJoints());
+      if (!getChainJointState(state, end_effector_link, positions, velocities))
       {
         return false;
       }
 
-      fkvel_[arm]->JntToCart(velocities, out);
+      fkvel_.at(end_effector_link)->JntToCart(velocities, out);
       return true;
     }
 
     bool KDLManager::getJointLimits(const std::string &end_effector_link, KDL::JntArray &q_min, KDL::JntArray &q_max, KDL::JntArray &q_vel_lim) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      unsigned int joint_n = chain_[arm].getNrOfJoints();
+      unsigned int joint_n = chain_.at(end_effector_link).getNrOfJoints();
       if (q_min.rows() != joint_n || q_max.rows() != joint_n || q_vel_lim.rows() != joint_n)
       {
         ROS_ERROR("KDLManager::getJointPositionLimits requires initialized joint arrays");
@@ -500,14 +473,14 @@ namespace generic_control_toolbox
       urdf::JointLimitsSharedPtr limits;
       int j = 0;
       // run through the kinematic chain joints and get the limits from the urdf model
-      for (unsigned int i = 0; i < chain_[arm].getNrOfSegments(); i++)
+      for (unsigned int i = 0; i < chain_.at(end_effector_link).getNrOfSegments(); i++)
       {
-        if (chain_[arm].getSegment(i).getJoint().getType() == KDL::Joint::JointType::None)
+        if (chain_.at(end_effector_link).getSegment(i).getJoint().getType() == KDL::Joint::JointType::None)
         {
           continue;
         }
 
-        joint = model_.getJoint(chain_[arm].getSegment(i).getJoint().getName());
+        joint = model_.getJoint(chain_.at(end_effector_link).getSegment(i).getJoint().getName());
         limits = joint->limits;
         q_min(j) = limits->lower;
         q_max(j) = limits->upper;
@@ -520,16 +493,14 @@ namespace generic_control_toolbox
 
     bool KDLManager::getJointPositions(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::JntArray &q) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      q.resize(chain_[arm].getNrOfJoints());
+      q.resize(chain_.at(end_effector_link).getNrOfJoints());
       KDL::JntArrayVel v(q.rows());
-      if (!getChainJointState(state, arm, q, v))
+      if (!getChainJointState(state, end_effector_link, q, v))
       {
         return false;
       }
@@ -539,9 +510,7 @@ namespace generic_control_toolbox
 
     bool KDLManager::getJointPositions(const std::string &end_effector_link, const sensor_msgs::JointState &state, Eigen::VectorXd &q) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
@@ -559,17 +528,15 @@ namespace generic_control_toolbox
 
     bool KDLManager::getJointVelocities(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::JntArray &q_dot) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      q_dot.resize(chain_[arm].getNrOfJoints());
+      q_dot.resize(chain_.at(end_effector_link).getNrOfJoints());
       KDL::JntArray q(q_dot.rows());
       KDL::JntArrayVel v(q_dot.rows());
-      if (!getChainJointState(state, arm, q, v))
+      if (!getChainJointState(state, end_effector_link, q, v))
       {
         return false;
       }
@@ -580,16 +547,14 @@ namespace generic_control_toolbox
 
     bool KDLManager::getInertia(const std::string &end_effector_link, const sensor_msgs::JointState &state, Eigen::MatrixXd &H)
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      KDL::JntArray q(chain_[arm].getNrOfJoints());
-      KDL::JntSpaceInertiaMatrix B(chain_[arm].getNrOfJoints());
-      dynamic_chain_[arm].JntToMass(q, B);
+      KDL::JntArray q(chain_.at(end_effector_link).getNrOfJoints());
+      KDL::JntSpaceInertiaMatrix B(chain_.at(end_effector_link).getNrOfJoints());
+      dynamic_chain_.at(end_effector_link)->JntToMass(q, B);
 
       H = B.data;
       return true;
@@ -597,22 +562,20 @@ namespace generic_control_toolbox
 
     bool KDLManager::getGravity(const std::string &end_effector_link, const sensor_msgs::JointState &state, Eigen::MatrixXd &g)
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      KDL::JntArray q(chain_[arm].getNrOfJoints());
-      KDL::JntArrayVel q_dot(chain_[arm].getNrOfJoints());
-      if (!getChainJointState(state, arm, q, q_dot))
+      KDL::JntArray q(chain_.at(end_effector_link).getNrOfJoints());
+      KDL::JntArrayVel q_dot(chain_.at(end_effector_link).getNrOfJoints());
+      if (!getChainJointState(state, end_effector_link, q, q_dot))
       {
         return false;
       }
 
-      KDL::JntArray q_gravity(chain_[arm].getNrOfJoints());
-      dynamic_chain_[arm].JntToGravity(q, q_gravity);
+      KDL::JntArray q_gravity(chain_.at(end_effector_link).getNrOfJoints());
+      dynamic_chain_.at(end_effector_link)->JntToGravity(q, q_gravity);
 
       g = q_gravity.data;
 
@@ -621,22 +584,20 @@ namespace generic_control_toolbox
 
     bool KDLManager::getCoriolis(const std::string &end_effector_link, const sensor_msgs::JointState &state, Eigen::MatrixXd &coriolis)
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      KDL::JntArray q(chain_[arm].getNrOfJoints());
-      KDL::JntArrayVel q_dot(chain_[arm].getNrOfJoints());
-      if (!getChainJointState(state, arm, q, q_dot))
+      KDL::JntArray q(chain_.at(end_effector_link).getNrOfJoints());
+      KDL::JntArrayVel q_dot(chain_.at(end_effector_link).getNrOfJoints());
+      if (!getChainJointState(state, end_effector_link, q, q_dot))
       {
         return false;
       }
 
-      KDL::JntArray cor(chain_[arm].getNrOfJoints());
-      dynamic_chain_[arm].JntToCoriolis(q, q_dot.qdot, cor);
+      KDL::JntArray cor(chain_.at(end_effector_link).getNrOfJoints());
+      dynamic_chain_.at(end_effector_link)->JntToCoriolis(q, q_dot.qdot, cor);
       coriolis = cor.data;
       return true;
     }
@@ -681,18 +642,16 @@ namespace generic_control_toolbox
 
     bool KDLManager::verifyPose(const std::string &end_effector_link, const KDL::Frame &in) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
       sensor_msgs::JointState dummy_state;
 
-      for (unsigned int i = 0; i < actuated_joint_names_[arm].size(); i++)
+      for (unsigned int i = 0; i < actuated_joint_names_.at(end_effector_link).size(); i++)
       {
-        dummy_state.name.push_back(actuated_joint_names_[arm][i]);
+        dummy_state.name.push_back(actuated_joint_names_.at(end_effector_link)[i]);
         dummy_state.position.push_back(0);
         dummy_state.velocity.push_back(0);
         dummy_state.effort.push_back(0);
@@ -709,23 +668,21 @@ namespace generic_control_toolbox
 
     bool KDLManager::getPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      KDL::JntArray positions(chain_[arm].getNrOfJoints());
-      KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
+      KDL::JntArray positions(chain_.at(end_effector_link).getNrOfJoints());
+      KDL::JntArrayVel velocities(chain_.at(end_effector_link).getNrOfJoints());
       KDL::Frame computedPose, difference;
-      if (!getChainJointState(state, arm, positions, velocities))
+      if (!getChainJointState(state, end_effector_link, positions, velocities))
       {
         return false;
       }
 
-      out.resize(chain_[arm].getNrOfJoints());
-      ikpos_[arm]->CartToJnt(positions, in, out);
+      out.resize(chain_.at(end_effector_link).getNrOfJoints());
+      ikpos_.at(end_effector_link)->CartToJnt(positions, in, out);
       getPoseFK(end_effector_link, state, out, computedPose); // verify if the forward kinematics of the computed solution are close to the desired pose
 
       difference = computedPose.Inverse() * in;
@@ -752,28 +709,24 @@ namespace generic_control_toolbox
 
     bool KDLManager::getGrippingPoseIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Frame &in, KDL::JntArray &out) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      KDL::Frame pose_in_eef = in*eef_to_gripping_point_[arm].Inverse();
+      KDL::Frame pose_in_eef = in*eef_to_gripping_point_.at(end_effector_link).Inverse();
 
       return getPoseIK(end_effector_link, state, pose_in_eef, out);
     }
 
     bool KDLManager::getPoseFK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::JntArray &in, KDL::Frame &out) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      fkpos_[arm]->JntToCart(in, out);
+      fkpos_.at(end_effector_link)->JntToCart(in, out);
       return true;
     }
 
@@ -781,9 +734,8 @@ namespace generic_control_toolbox
     {
       KDL::Frame gripping_to_base;
       KDL::Twist modified_in, rotated_in;
-      int arm;
 
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
@@ -808,51 +760,45 @@ namespace generic_control_toolbox
 
     bool KDLManager::getVelIK(const std::string &end_effector_link, const sensor_msgs::JointState &state, const KDL::Twist &in, KDL::JntArray &out) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      KDL::JntArray positions(chain_[arm].getNrOfJoints());
-      KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
-      if (!getChainJointState(state, arm, positions, velocities))
+      KDL::JntArray positions(chain_.at(end_effector_link).getNrOfJoints());
+      KDL::JntArrayVel velocities(chain_.at(end_effector_link).getNrOfJoints());
+      if (!getChainJointState(state, end_effector_link, positions, velocities))
       {
         return false;
       }
 
-      out.resize(chain_[arm].getNrOfJoints());
-      ikvel_[arm]->CartToJnt(positions, in, out);
+      out.resize(chain_.at(end_effector_link).getNrOfJoints());
+      ikvel_.at(end_effector_link)->CartToJnt(positions, in, out);
       return true;
     }
 
     bool KDLManager::getJacobian(const std::string &end_effector_link, const sensor_msgs::JointState &state, KDL::Jacobian &out) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      KDL::JntArray positions(chain_[arm].getNrOfJoints());
-      KDL::JntArrayVel velocities(chain_[arm].getNrOfJoints());
-      if (!getChainJointState(state, arm, positions, velocities))
+      KDL::JntArray positions(chain_.at(end_effector_link).getNrOfJoints());
+      KDL::JntArrayVel velocities(chain_.at(end_effector_link).getNrOfJoints());
+      if (!getChainJointState(state, end_effector_link, positions, velocities))
       {
         return false;
       }
 
       out.resize(positions.rows());
-      jac_solver_[arm]->JntToJac(positions, out);
+      jac_solver_.at(end_effector_link)->JntToJac(positions, out);
       return true;
     }
 
     bool KDLManager::checkStateMessage(const std::string &end_effector_link, const sensor_msgs::JointState &state) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
@@ -868,18 +814,18 @@ namespace generic_control_toolbox
         return false;
       }
 
-      for (unsigned long i = 0; i < actuated_joint_names_[arm].size(); i++)
+      for (unsigned long i = 0; i < actuated_joint_names_.at(end_effector_link).size(); i++)
       {
         for (unsigned long j = 0; j < state.name.size(); j++)
         {
-          if (actuated_joint_names_[arm][i] == state.name[j])
+          if (actuated_joint_names_.at(end_effector_link)[i] == state.name[j])
           {
             processed_joints++;
           }
         }
       }
 
-      if (processed_joints != actuated_joint_names_[arm].size())
+      if (processed_joints != actuated_joint_names_.at(end_effector_link).size())
       {
         return false;
       }
@@ -887,7 +833,7 @@ namespace generic_control_toolbox
       return true;
     }
 
-    bool KDLManager::getChainJointState(const sensor_msgs::JointState &current_state, int arm, KDL::JntArray &positions, KDL::JntArrayVel &velocities) const
+    bool KDLManager::getChainJointState(const sensor_msgs::JointState &current_state, const std::string &end_effector_link, KDL::JntArray &positions, KDL::JntArrayVel &velocities) const
     {
       unsigned int processed_joints = 0;
       unsigned int name_size, pos_size, vel_size;
@@ -902,11 +848,11 @@ namespace generic_control_toolbox
         return false;
       }
 
-      for (unsigned long i = 0; i < actuated_joint_names_[arm].size(); i++)
+      for (unsigned long i = 0; i < actuated_joint_names_.at(end_effector_link).size(); i++)
       {
         for (unsigned long j = 0; j < current_state.name.size(); j++)
         {
-          if (actuated_joint_names_[arm][i] == current_state.name[j])
+          if (actuated_joint_names_.at(end_effector_link)[i] == current_state.name[j])
           {
             positions(processed_joints) = current_state.position[j];
             velocities.q(processed_joints) = current_state.position[j];
@@ -916,7 +862,7 @@ namespace generic_control_toolbox
         }
       }
 
-      if (processed_joints != actuated_joint_names_[arm].size())
+      if (processed_joints != actuated_joint_names_.at(end_effector_link).size())
       {
         ROS_ERROR("Failed to acquire chain joint state");
         return false;
@@ -940,14 +886,12 @@ namespace generic_control_toolbox
 
     bool KDLManager::getNumJoints(const std::string &end_effector_link, unsigned int &num_joints) const
     {
-      int arm;
-
-      if (!getIndex(end_effector_link, arm))
+      if (chain_.find(end_effector_link) == chain_.end())
       {
         return false;
       }
 
-      num_joints = chain_[arm].getNrOfJoints();
+      num_joints = chain_.at(end_effector_link).getNrOfJoints();
       return true;
     }
 

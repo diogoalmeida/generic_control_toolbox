@@ -5,29 +5,6 @@ namespace generic_control_toolbox
   ManagerBase::ManagerBase(){}
   ManagerBase::~ManagerBase(){}
 
-  bool ManagerBase::getIndex(const std::string &key, int &i) const
-  {
-    i = -1;
-
-    for (int j = 0; j < manager_index_.size(); j++)
-    {
-      if (key == manager_index_[j])
-      {
-        i = j;
-        break;
-      }
-    }
-
-    if (i < 0)
-    {
-      ROS_ERROR_ONCE("Key %s was not initialized", key.c_str());
-      ROS_DEBUG_THROTTLE(10, "Key %s was not initialized", key.c_str());
-      return false;
-    }
-
-    return true;
-  }
-
   bool getArmInfo(const std::string &arm_name, ArmInfo &info)
   {
     ros::NodeHandle nh("~");

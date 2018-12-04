@@ -86,9 +86,9 @@ namespace generic_control_toolbox
     **/
     void publishMarkers();
   private:
-    std::vector<std::map<std::string, int> > marker_map_;
-    std::vector<visualization_msgs::MarkerArray> marker_array_;
-    std::vector<std::shared_ptr<realtime_tools::RealtimePublisher<visualization_msgs::MarkerArray> > > marker_pub_;
+    std::map<std::string, std::map<std::string, int> > marker_map_;
+    std::map<std::string, visualization_msgs::MarkerArray> marker_array_;
+    std::map<std::string, std::shared_ptr<realtime_tools::RealtimePublisher<visualization_msgs::MarkerArray> > > marker_pub_;
     ros::NodeHandle n_;
 
     /**
