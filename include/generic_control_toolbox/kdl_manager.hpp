@@ -320,21 +320,34 @@ namespace generic_control_toolbox
     bool getNumJoints(const std::string &end_effector_link, unsigned int &num_joints) const;
 
   private:
-    std::vector<std::shared_ptr<KDL::ChainIkSolverVel> > ikvel_;
-    std::vector<std::shared_ptr<KDL::ChainIkSolverPos_LMA> > ikpos_;
-    std::vector<std::shared_ptr<KDL::ChainFkSolverPos_recursive> > fkpos_;
-    std::vector<std::shared_ptr<KDL::ChainFkSolverVel_recursive> > fkvel_;
-    std::vector<std::shared_ptr<KDL::ChainJntToJacSolver> > jac_solver_;
-    std::vector<KDL::Frame> eef_to_gripping_point_;
-    std::vector<KDL::Frame> eef_to_sensor_point_;
-    std::vector<KDL::Chain> chain_;
-    std::vector<KDL::ChainDynParam> dynamic_chain_;
+    typedef KDL::ChainIkSolverVel IkSolverVel;
+    typedef KDL::ChainIkSolverPos_LMA IkSolverPos;
+    typedef KDL::ChainFkSolverPos_recursive FkSolverPos;
+    typedef KDL::ChainFkSolverVel_recursive FkSolverVel;
+    typedef KDL::ChainJntToJacSolver JacSolver;
+
+    typedef std::shared_ptr<IkSolverVel> IkSolverVelPtr;
+    typedef std::shared_ptr<IkSolverPos> IkSolverPosPtr;
+    typedef std::shared_ptr<FkSolverPos> FkSolverPosPtr;
+    typedef std::shared_ptr<FkSolverVel> FkSolverVelPtr;
+    typedef std::shared_ptr<JacSolver> JacSolverPtr;
+    typedef std::shared_ptr<KDL::ChainDynParam> ChainDynParamPtr;
+
+    std::map<std::string, IkSolverVelPtr> ikvel_;
+    std::map<std::string, IkSolverPosPtr> ikpos_;
+    std::map<std::string, FkSolverPosPtr> fkpos_;
+    std::map<std::string, FkSolverVelPtr> fkvel_;
+    std::map<std::string, JacSolverPtr> jac_solver_;
+    std::map<std::string, KDL::Frame> eef_to_gripping_point_;
+    std::map<std::string, KDL::Frame> eef_to_sensor_point_;
+    std::map<std::string, KDL::Chain> chain_;
+    std::map<std::string, ChainDynParamPtr> dynamic_chain_;
 
     urdf::Model model_;
     ros::NodeHandle nh_;
     tf::TransformListener listener_;
     KDL::Vector gravity_in_chain_base_link_;
-    std::vector<std::vector<std::string> > actuated_joint_names_; /// list of actuated joints per arm
+    std::map<std::string, std::vector<std::string> > actuated_joint_names_; /// list of actuated joints per arm
     std::string chain_base_link_, ikvel_solver_;
     double eps_, max_tf_attempts_, nso_weight_, ik_pos_tolerance_, ik_angle_tolerance_;
 
@@ -374,7 +387,7 @@ namespace generic_control_toolbox
       @param velocities The joint velocities of the kinematic chain.
       @return True if the full joint chain was found in the current state, false otherwise.
     **/
-    bool getChainJointState(const sensor_msgs::JointState &current_state, int arm, KDL::JntArray &positions, KDL::JntArrayVel &velocities) const;
+    bool getChainJointState(const sensor_msgs::JointState &current_state, const std::string &end_effector_link, KDL::JntArray &positions, KDL::JntArrayVel &velocities) const;
 
     /**
       Check if a chain has the given joint_name.

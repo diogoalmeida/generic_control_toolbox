@@ -57,13 +57,13 @@ namespace generic_control_toolbox
 
   private:
     int max_tf_attempts_;
-    std::vector<std::string> sensor_frame_;
-    std::vector<KDL::Frame> sensor_to_gripping_point_;
-    std::vector<KDL::Wrench > measured_wrench_;
-    std::vector<ros::Subscriber> ft_sub_;
-    std::vector<ros::Publisher> processed_ft_pub_;
-    std::vector<std::string> gripping_frame_;
-    std::vector<Eigen::Matrix<double, 6, 6> > calibration_matrix_;
+    std::map<std::string, std::string> sensor_frame_;
+    std::map<std::string, KDL::Frame> sensor_to_gripping_point_;
+    std::map<std::string, KDL::Wrench > measured_wrench_;
+    std::map<std::string, ros::Subscriber> ft_sub_;
+    std::map<std::string, ros::Publisher> processed_ft_pub_;
+    std::map<std::string, std::string> gripping_frame_;
+    std::map<std::string, Eigen::Matrix<double, 6, 6> > calibration_matrix_;
     tf::TransformListener listener_;
     MatrixParser parser_;
     ros::NodeHandle nh_;
