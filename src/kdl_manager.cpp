@@ -174,7 +174,7 @@ namespace generic_control_toolbox
       // Initialize solvers
       fkpos_[end_effector_link] = FkSolverPosPtr(new FkSolverPos(chain_.at(end_effector_link)));
       fkvel_[end_effector_link] = FkSolverVelPtr(new FkSolverVel(chain_.at(end_effector_link)));
-      ikpos_[end_effector_link] = IkSolverPosPtr(new IkSolverPos(chain_.at(end_effector_link)));
+      ikpos_[end_effector_link] = IkSolverPosPtr(new IkSolverPos(chain_base_link_, end_effector_link));
       jac_solver_[end_effector_link] = JacSolverPtr(new JacSolver(chain_.at(end_effector_link)));
       eef_to_gripping_point_[end_effector_link] = KDL::Frame::Identity(); // Initialize a neutral transform.
       eef_to_sensor_point_[end_effector_link] = KDL::Frame::Identity(); // Initialize a neutral transform.
