@@ -16,7 +16,6 @@ KDLManager::KDLManager(const std::string &chain_base_link, ros::NodeHandle nh)
 
 KDLManager::~KDLManager() {}
 
-
 bool KDLManager::getParam()
 {
   if (!nh_.getParam("kdl_manager/eps", eps_))

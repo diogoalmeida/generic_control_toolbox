@@ -99,7 +99,7 @@ class ControllerTemplate : public ControllerBase
   **/
   sensor_msgs::JointState lastState(const sensor_msgs::JointState &current);
 
-  boost::shared_ptr<actionlib::SimpleActionServer<ActionClass>> action_server_;
+  boost::shared_ptr<actionlib::SimpleActionServer<ActionClass> > action_server_;
   ActionFeedback feedback_;
   ActionResult result_;
 
@@ -284,7 +284,7 @@ void ControllerTemplate<ActionClass, ActionGoal, ActionFeedback,
 {
   // Initialize actionlib server
   action_server_ =
-      boost::shared_ptr<actionlib::SimpleActionServer<ActionClass>>(
+      boost::shared_ptr<actionlib::SimpleActionServer<ActionClass> >(
           new actionlib::SimpleActionServer<ActionClass>(nh_, action_name_,
                                                          false));
 

@@ -70,7 +70,7 @@ class WrenchManager : public ManagerBase
   std::map<std::string, ros::Subscriber> ft_sub_;
   std::map<std::string, ros::Publisher> processed_ft_pub_;
   std::map<std::string, std::string> gripping_frame_;
-  std::map<std::string, Eigen::Matrix<double, 6, 6>> calibration_matrix_;
+  std::map<std::string, Eigen::Matrix<double, 6, 6> > calibration_matrix_;
   tf::TransformListener listener_;
   MatrixParser parser_;
   ros::NodeHandle nh_;

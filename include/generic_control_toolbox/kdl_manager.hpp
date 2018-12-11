@@ -407,7 +407,7 @@ class KDLManager : public ManagerBase
   ros::NodeHandle nh_;
   tf::TransformListener listener_;
   KDL::Vector gravity_in_chain_base_link_;
-  std::map<std::string, std::vector<std::string>>
+  std::map<std::string, std::vector<std::string> >
       actuated_joint_names_;  /// list of actuated joints per arm
   std::string chain_base_link_, ikvel_solver_;
   double eps_, max_tf_attempts_, nso_weight_, ik_pos_tolerance_,
