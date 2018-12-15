@@ -18,6 +18,7 @@
 #include <kdl/chainiksolverpos_lma.hpp>
 #include <kdl/chainiksolvervel_pinv_nso.hpp>
 #include <kdl/chainiksolvervel_wdls.hpp>
+#include <kdl/chainjnttojacsolver.hpp>
 #include <kdl/frames.hpp>
 #include <kdl/kdl.hpp>
 #include <kdl_parser/kdl_parser.hpp>
