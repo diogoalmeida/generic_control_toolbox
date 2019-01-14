@@ -876,7 +876,8 @@ bool KDLManager::getGrippingVelIK(const std::string &end_effector_link,
   tf::vectorKDLToEigen(modified_in.vel, vel_eig);
   tf::vectorKDLToEigen(modified_in.rot, rot_eig);
 
-  vel_eig = MatrixParser::computeSkewSymmetric(pgrip_eig - peef_eig)*rot_eig + vel_eig;
+  vel_eig = MatrixParser::computeSkewSymmetric(pgrip_eig - peef_eig) * rot_eig +
+            vel_eig;
 
   tf::vectorEigenToKDL(vel_eig, modified_in.vel);
 
