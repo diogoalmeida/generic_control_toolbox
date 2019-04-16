@@ -95,22 +95,8 @@ bool RosControlInterface<JointInterface>::init(JointInterface* hw,
   // joint initialization from
   // https://github.com/ros-controls/ros_controllers/blob/melodic-devel/effort_controllers/src/joint_group_position_controller.cpp
 
-  // List of controlled joints
-  std::string param_name = "joints";
-  if (!nh.getParam(param_name, joint_names_))
-  {
-    ROS_ERROR_STREAM("Failed to getParam '" << param_name << "' (namespace: "
-                                            << nh.getNamespace() << ").");
-    return false;
-  }
-
+  joint_names_ = hw->getNames();
   n_joints_ = joint_names_.size();
-
-  if (n_joints_ == 0)
-  {
-    ROS_ERROR_STREAM("List of joint names is empty.");
-    return false;
-  }
 
   // Get URDF
   urdf::Model urdf;
@@ -171,7 +157,7 @@ void RosControlInterface<JointInterface>::update(const ros::Time& time,
   {
     const std::string& name = joint_names_[i];
 
-    for (unsigned int j = 0; j < n_joints_; j++)
+    for (unsigned int j = 0; j < command.name.size(); j++)
     {
       if (command.name[j] == name)
       {
