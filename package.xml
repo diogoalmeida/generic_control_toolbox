@@ -20,5 +20,7 @@
   <depend>sensor_msgs</depend>
   <depend>tf_conversions</depend>
   <depend>realtime_tools</depend>
+  <depend>hardware_interface</depend>
+  <depend>controller_interface</depend>
   <depend>tf</depend>
 </package>

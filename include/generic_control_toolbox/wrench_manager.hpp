@@ -21,7 +21,7 @@ namespace generic_control_toolbox
 class WrenchManager : public ManagerBase
 {
  public:
-  WrenchManager();
+  WrenchManager(ros::NodeHandle nh_ = ros::NodeHandle("~"));
   ~WrenchManager();
 
   /**
@@ -88,9 +88,11 @@ class WrenchManager : public ManagerBase
   Uses the ros parameter server to obtain information."
 
   @param arm_info The arm information
-  @param manager Reference to the wrench manager.
+  @param manager Shared pointer to the wrench manager.
   @return False if something goes wrong, true otherwise.
 **/
 bool setWrenchManager(const ArmInfo &arm_info, WrenchManager &manager);
+bool setWrenchManager(const ArmInfo &arm_info,
+                      std::shared_ptr<WrenchManager> &manager);
 }  // namespace generic_control_toolbox
 #endif

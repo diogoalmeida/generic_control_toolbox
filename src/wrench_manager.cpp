@@ -2,9 +2,8 @@
 
 namespace generic_control_toolbox
 {
-WrenchManager::WrenchManager()
+WrenchManager::WrenchManager(ros::NodeHandle nh) : nh_(nh)
 {
-  nh_ = ros::NodeHandle("~");
   if (!nh_.getParam("wrench_manager/max_tf_attempts", max_tf_attempts_))
   {
     ROS_WARN(
@@ -186,5 +185,11 @@ bool setWrenchManager(const ArmInfo &arm_info, WrenchManager &manager)
   }
 
   return true;
+}
+
+bool setWrenchManager(const ArmInfo &arm_info,
+                      std::shared_ptr<WrenchManager> &manager)
+{
+  return setWrenchManager(arm_info, *manager);
 }
 }  // namespace generic_control_toolbox

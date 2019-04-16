@@ -15,6 +15,8 @@ find_package(
   sensor_msgs
   tf_conversions
   realtime_tools
+  hardware_interface
+  controller_interface
   tf
 )
 
@@ -40,9 +42,13 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp rospy actionlib geometry_msgs visualization_msgs cmake_modules eigen_conversions kdl_parser sensor_msgs tf_conversions realtime_tools tf trac_ik_lib
+  CATKIN_DEPENDS roscpp rospy actionlib geometry_msgs visualization_msgs
+                 cmake_modules eigen_conversions kdl_parser sensor_msgs
+                 tf_conversions realtime_tools hardware_interface
+                 controller_interface tf trac_ik_lib
   INCLUDE_DIRS include
-  LIBRARIES matrix_parser kdl_manager wrench_manager controller_template marker_manager controller_action_node
+  LIBRARIES matrix_parser kdl_manager wrench_manager controller_template
+            marker_manager controller_action_node ros_control_interface
 )
 
 include_directories(
@@ -73,5 +79,9 @@ add_dependencies(controller_template ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME
 add_library(controller_action_node src/controller_action_node.cpp)
 target_link_libraries(controller_action_node ${catkin_LIBRARIES})
 add_dependencies(controller_action_node ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+add_library(ros_control_interface src/ros_control_interface.cpp)
+target_link_libraries(ros_control_interface ${catkin_LIBRARIES})
+add_dependencies(ros_control_interface ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 install(PROGRAMS src/generic_control_toolbox/manage_actionlib.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
