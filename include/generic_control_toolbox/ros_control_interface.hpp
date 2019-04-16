@@ -31,10 +31,19 @@ class RosControlInterface
   void stopping(const ros::Time& time);
 
  protected:
-  std::shared_ptr<ControllerBase> controller_;
+  /**
+   Initializes an instance of a Controller base to be embedded within ROS
+   Control.
+
+   @param nh The NodeHandle provided by ROS control with the namespace of the
+     controller.
+   @returns A shared pointer to the instantiated controller base
+  **/
+  virtual std::shared_ptr<ControllerBase> initController(
+      ros::NodeHandle& nh) const = 0;
 
  private:
-  ros::NodeHandle nh_;
+  std::shared_ptr<ControllerBase> controller_;
   JointType joint_type_;
   unsigned int n_joints_;
   std::vector<std::string> joint_names_;
@@ -47,7 +56,6 @@ class RosControlInterface
 template <class JointInterface>
 RosControlInterface<JointInterface>::RosControlInterface()
 {
-  nh_ = ros::NodeHandle("~");
   controller_ = NULL;
 
   // check interface type
@@ -77,6 +85,7 @@ template <class JointInterface>
 bool RosControlInterface<JointInterface>::init(JointInterface* hw,
                                                ros::NodeHandle& nh)
 {
+  controller_ = initController(nh);
   if (!controller_)
   {
     ROS_ERROR_STREAM("Failed to initialize controller algorithm! (namespace: "
