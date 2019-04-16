@@ -203,6 +203,11 @@ template <class ActionClass, class ActionGoal, class ActionFeedback,
 void ControllerTemplate<ActionClass, ActionGoal, ActionFeedback,
                         ActionResult>::resetInternalState()
 {
+  if (action_server_->isActive())
+  {
+    action_server_->setAborted();
+  }
+
   resetFlags();
   resetController();
 }
