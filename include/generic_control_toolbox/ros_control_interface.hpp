@@ -139,13 +139,47 @@ template <class JointInterface>
 void RosControlInterface<JointInterface>::update(const ros::Time& time,
                                                  const ros::Duration& period)
 {
+  sensor_msgs::JointState curr_state, command;
+
+  for (unsigned int i = 0; i < n_joints_; i++)
+  {
+    curr_state.name.push_back(joint_names_[i]);
+    curr_state.position.push_back(joints_[i].getPosition());
+    curr_state.velocity.push_back(joints_[i].getVelocity());
+    curr_state.effort.push_back(joints_[i].getEffort());
+  }
+
+  command = controller_.updateControl(curr_state, period);
+
+  for (unsigned int i = 0; i < n_joints_; i++)
+  {
+    const std::string& name = joint_names_[i];
+
+    for (unsigned int j = 0; j < n_joints_; j++)
+    {
+      if (command.name[j] == name)
+      {
+        switch (joint_type_)
+        {
+          case EFFORT:
+            joints_[i].setCommand(command.effort[j]);
+            break;
+          case VELOCITY:
+            joints_[i].setCommand(command.velocity[j]);
+            break;
+          case POSITION:
+            joints_[i].setCommand(command.position[j]);
+            break;
+        }
+      }
+    }
+  }
 }
 
 template <class JointInterface>
 void RosControlInterface<JointInterface>::stopping(const ros::Time& time)
 {
+  controller_.resetInternalState();
 }
-
 }  // namespace generic_control_toolbox
-
 #endif
