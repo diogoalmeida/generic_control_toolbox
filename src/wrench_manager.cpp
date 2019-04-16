@@ -186,4 +186,10 @@ bool setWrenchManager(const ArmInfo &arm_info, WrenchManager &manager)
 
   return true;
 }
+
+bool setWrenchManager(const ArmInfo &arm_info,
+                      std::shared_ptr<WrenchManager> &manager)
+{
+  return setWrenchManager(arm_info, *manager);
+}
 }  // namespace generic_control_toolbox
