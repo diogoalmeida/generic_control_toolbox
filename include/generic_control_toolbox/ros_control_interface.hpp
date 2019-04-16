@@ -30,9 +30,11 @@ class RosControlInterface
   void update(const ros::Time& time, const ros::Duration& period);
   void stopping(const ros::Time& time);
 
- private:
-  ros::NodeHandle& nh_;
+ protected:
   std::shared_ptr<ControllerBase> controller_;
+
+ private:
+  ros::NodeHandle nh_;
   JointType joint_type_;
   unsigned int n_joints_;
   std::vector<std::string> joint_names_;
