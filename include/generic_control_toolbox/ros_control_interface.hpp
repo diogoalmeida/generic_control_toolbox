@@ -23,7 +23,7 @@ class RosControlInterface
     : public controller_interface::Controller<JointInterface>
 {
  public:
-  RosControlInterface(ControllerBase& controller);
+  RosControlInterface();
 
   bool init(JointInterface* hw, ros::NodeHandle& nh);
   void starting(const ros::Time& time);
@@ -32,7 +32,7 @@ class RosControlInterface
 
  private:
   ros::NodeHandle& nh_;
-  ControllerBase controller_;
+  std::shared_ptr<ControllerBase> controller_;
   JointType joint_type_;
   unsigned int n_joints_;
   std::vector<std::string> joint_names_;
@@ -43,11 +43,10 @@ class RosControlInterface
 // Implementation in header file due to being a template class.
 
 template <class JointInterface>
-RosControlInterface<JointInterface>::RosControlInterface(
-    ControllerBase& controller)
-    : controller_(controller)
+RosControlInterface<JointInterface>::RosControlInterface()
 {
   nh_ = ros::NodeHandle("~");
+  controller_ = NULL;
 
   // check interface type
   JointInterface* hw = new JointInterface();
@@ -76,6 +75,12 @@ template <class JointInterface>
 bool RosControlInterface<JointInterface>::init(JointInterface* hw,
                                                ros::NodeHandle& nh)
 {
+  if (!controller_)
+  {
+    ROS_ERROR_STREAM("Failed to initialize controller algorithm! (namespace: "
+                     << nh.getNamespace() << ").");
+  }
+
   // joint initialization from
   // https://github.com/ros-controls/ros_controllers/blob/melodic-devel/effort_controllers/src/joint_group_position_controller.cpp
 
@@ -126,13 +131,13 @@ bool RosControlInterface<JointInterface>::init(JointInterface* hw,
     joint_urdfs_.push_back(joint_urdf);
   }
 
-  controller_.resetInternalState();
+  controller_->resetInternalState();
 }
 
 template <class JointInterface>
 void RosControlInterface<JointInterface>::starting(const ros::Time& time)
 {
-  controller_.resetInternalState();
+  controller_->resetInternalState();
 }
 
 template <class JointInterface>
@@ -149,7 +154,7 @@ void RosControlInterface<JointInterface>::update(const ros::Time& time,
     curr_state.effort.push_back(joints_[i].getEffort());
   }
 
-  command = controller_.updateControl(curr_state, period);
+  command = controller_->updateControl(curr_state, period);
 
   for (unsigned int i = 0; i < n_joints_; i++)
   {
@@ -179,7 +184,7 @@ void RosControlInterface<JointInterface>::update(const ros::Time& time,
 template <class JointInterface>
 void RosControlInterface<JointInterface>::stopping(const ros::Time& time)
 {
-  controller_.resetInternalState();
+  controller_->resetInternalState();
 }
 }  // namespace generic_control_toolbox
 #endif
