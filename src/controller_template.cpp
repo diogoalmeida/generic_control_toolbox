@@ -2,7 +2,7 @@
 
 namespace generic_control_toolbox
 {
-ControllerBase::ControllerBase() {}
+ControllerBase::ControllerBase(ros::NodeHandle nh) {}
 ControllerBase::~ControllerBase() {}
 
 // Implementation of the template class in the header file to prevent linking

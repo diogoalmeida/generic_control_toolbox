@@ -16,7 +16,7 @@ Defines the basic cartesian controller interface.
 class ControllerBase
 {
  public:
-  ControllerBase();
+  ControllerBase(ros::NodeHandle nh = ros::NodeHandle("~"));
   virtual ~ControllerBase();
 
   /**
@@ -54,7 +54,8 @@ template <class ActionClass, class ActionGoal, class ActionFeedback,
 class ControllerTemplate : public ControllerBase
 {
  public:
-  ControllerTemplate(const std::string &action_name);
+  ControllerTemplate(const std::string &action_name,
+                     ros::NodeHandle nh = ros::NodeHandle("~"));
   virtual ~ControllerTemplate();
 
   /**
@@ -134,10 +135,9 @@ class ControllerTemplate : public ControllerBase
 template <class ActionClass, class ActionGoal, class ActionFeedback,
           class ActionResult>
 ControllerTemplate<ActionClass, ActionGoal, ActionFeedback, ActionResult>::
-    ControllerTemplate(const std::string &action_name)
-    : action_name_(action_name)
+    ControllerTemplate(const std::string &action_name, ros::NodeHandle nh)
+    : action_name_(action_name), nh_(nh)
 {
-  nh_ = ros::NodeHandle("~");
   resetFlags();
   startActionlib();
 }

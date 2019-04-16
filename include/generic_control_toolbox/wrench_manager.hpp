@@ -21,7 +21,7 @@ namespace generic_control_toolbox
 class WrenchManager : public ManagerBase
 {
  public:
-  WrenchManager();
+  WrenchManager(ros::NodeHandle nh_ = ros::NodeHandle("~"));
   ~WrenchManager();
 
   /**
