@@ -3,6 +3,7 @@ project(generic_control_toolbox)
 
 find_package(
   catkin REQUIRED COMPONENTS
+  rosbag
   roscpp
   rospy
   actionlib
@@ -41,7 +42,7 @@ generate_messages(
 )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp rospy actionlib geometry_msgs visualization_msgs
+  CATKIN_DEPENDS rosbag roscpp rospy actionlib geometry_msgs visualization_msgs
                  cmake_modules eigen_conversions kdl_parser sensor_msgs
                  tf_conversions realtime_tools hardware_interface
                  controller_interface tf
