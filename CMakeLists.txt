@@ -48,12 +48,17 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES matrix_parser kdl_manager wrench_manager controller_template
             marker_manager controller_action_node ros_control_interface
+            bag_manager
 )
 
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
 )
+
+add_library(bag_manager src/bag_manager.cpp)
+target_link_libraries(bag_manager ${catkin_LIBRARIES})
+add_dependencies(bag_manager ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 add_library(matrix_parser src/matrix_parser.cpp)
 target_link_libraries(matrix_parser ${catkin_LIBRARIES})
