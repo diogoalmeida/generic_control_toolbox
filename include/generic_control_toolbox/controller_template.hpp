@@ -283,7 +283,7 @@ bool ControllerTemplate<ActionClass, ActionGoal, ActionFeedback,
 
     if (nh_.getParam("record_bag/package", package_name))
     {
-      path = ros::package::getPath(package_name);
+      path = ros::package::getPath(package_name) + "/bags/";
       bag_manager_ = std::make_shared<BagManager>(path, topic);
     }
     else if (nh_.getParam("record_bag/path", path))

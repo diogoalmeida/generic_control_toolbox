@@ -6,8 +6,9 @@ BagManager::BagManager(const std::string &path,
                        const std::string &default_topic)
     : default_topic_(default_topic)
 {
+  boost::filesystem::create_directory(path);
   int num = numOfFiles(path);
-  std::string name = path + "_" + std::to_string(num);
+  std::string name = path + "log_" + std::to_string(num) + ".bag";
   ROS_DEBUG_STREAM("Opening a new bag: " << name);
   bag_.open(name, rosbag::bagmode::Write);
 }
@@ -19,7 +20,7 @@ int BagManager::numOfFiles(const std::string &path) const
   // from http://www.cplusplus.com/forum/beginner/70854/
   boost::filesystem::path p(path);
   boost::filesystem::directory_iterator end_iter;
-  int num = 0;
+  int num = 1;
 
   for (boost::filesystem::directory_iterator iter(p); iter != end_iter; iter++)
   {
