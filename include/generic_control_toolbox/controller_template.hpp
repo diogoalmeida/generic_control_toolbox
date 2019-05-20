@@ -2,9 +2,11 @@
 #define __CONTROLLER_TEMPLATE__
 
 #include <actionlib/server/simple_action_server.h>
+#include <ros/package.h>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
 #include <cmath>
+#include <generic_control_toolbox/bag_manager.hpp>
 
 namespace generic_control_toolbox
 {
@@ -128,6 +130,7 @@ class ControllerTemplate : public ControllerBase
 
   std::string action_name_;
   ros::NodeHandle nh_;
+  std::shared_ptr<BagManager> bag_manager_;
   sensor_msgs::JointState last_state_;
   bool has_state_, acquired_goal_;
 };
@@ -165,6 +168,11 @@ sensor_msgs::JointState ControllerTemplate<
 
   sensor_msgs::JointState ret = controlAlgorithm(current_state, dt);
   action_server_->publishFeedback(feedback_);
+
+  if (bag_manager_)
+  {
+    bag_manager_->write(feedback_);  // build log file
+  }
 
   if (!action_server_->isActive())
   {
@@ -219,6 +227,11 @@ void ControllerTemplate<ActionClass, ActionGoal, ActionFeedback,
 {
   has_state_ = false;
   acquired_goal_ = false;
+
+  if (bag_manager_)
+  {
+    bag_manager_.reset();
+  }
 }
 
 template <class ActionClass, class ActionGoal, class ActionFeedback,
@@ -261,6 +274,30 @@ bool ControllerTemplate<ActionClass, ActionGoal, ActionFeedback,
   }
 
   acquired_goal_ = true;
+
+  if (nh_.hasParam("record_bag"))  // controller is supposed to produce a log
+  {
+    std::string package_name, path, topic;
+
+    topic = nh_.resolveName(action_name_) + std::string("/feedback");
+
+    if (nh_.getParam("record_bag/package", package_name))
+    {
+      path = ros::package::getPath(package_name) + "/bags/";
+      bag_manager_ = std::make_shared<BagManager>(path, topic);
+    }
+    else if (nh_.getParam("record_bag/path", path))
+    {
+      bag_manager_ = std::make_shared<BagManager>(path, topic);
+    }
+    else
+    {
+      ROS_WARN(
+          "No record_bag/package or record_bag/path parameters detected! No "
+          "bag will be recorded");
+    }
+  }
+
   ROS_INFO("New goal received in %s", action_name_.c_str());
   return true;
 }
