@@ -51,6 +51,18 @@ class BagManager
   **/
   int numOfFiles(const std::string &path) const;
 };
+
+template <class T>
+void BagManager::write(const T &msg)
+{
+  bag_.write(default_topic_, ros::Time::now(), msg);
+}
+
+template <class T>
+void BagManager::write(const std::string &topic, const T &msg)
+{
+  bag_.write(topic, ros::Time::now(), msg);
+}
 }  // namespace generic_control_toolbox
 
 #endif

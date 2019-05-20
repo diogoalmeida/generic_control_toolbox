@@ -169,6 +169,11 @@ sensor_msgs::JointState ControllerTemplate<
   sensor_msgs::JointState ret = controlAlgorithm(current_state, dt);
   action_server_->publishFeedback(feedback_);
 
+  if (bag_manager_)
+  {
+    bag_manager_->write(feedback_);  // build log file
+  }
+
   if (!action_server_->isActive())
   {
     resetInternalState();

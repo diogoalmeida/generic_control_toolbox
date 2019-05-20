@@ -14,18 +14,6 @@ BagManager::BagManager(const std::string &path,
 
 BagManager::~BagManager() { bag_.close(); }
 
-template <class T>
-void BagManager::write(const T &msg)
-{
-  bag_.write(default_topic_, ros::Time::now(), msg);
-}
-
-template <class T>
-void BagManager::write(const std::string &topic, const T &msg)
-{
-  bag_.write(topic, ros::Time::now(), msg);
-}
-
 int BagManager::numOfFiles(const std::string &path) const
 {
   // from http://www.cplusplus.com/forum/beginner/70854/

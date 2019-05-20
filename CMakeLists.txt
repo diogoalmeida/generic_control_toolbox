@@ -77,7 +77,7 @@ add_library(marker_manager src/marker_manager.cpp)
 target_link_libraries(marker_manager ${catkin_LIBRARIES})
 add_dependencies(marker_manager ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-add_library(controller_template src/controller_template.cpp)
+add_library(controller_template src/controller_template.cpp src/bag_manager.cpp)
 target_link_libraries(controller_template ${catkin_LIBRARIES})
 add_dependencies(controller_template ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
