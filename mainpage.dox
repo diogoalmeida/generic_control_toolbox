@@ -1,0 +1,15 @@
+/**
+\mainpage
+\htmlinclude manifest.html
+
+\section About
+The generic control toolbox includes a set of utilities designed to facilitate the development of
+robot controllers in a ROS system.
+
+\section Utilities
+- \link generic_control_toolbox::KDLManager KDLManager \endlink - Encapsulates useful kinematics-related functionality
+- \link generic_control_toolbox::WrenchManager WrenchManager \endlink - Utilities for processing wrench information on a robotic manipulator
+- \link generic_control_toolbox::ControllerTemplate ControllerTemplate \endlink - Allows a user to implement a controller with actionlib functionality
+- \link generic_control_toolbox::RosControlInterface RosControlInterface \endlink - Embeds a ControllerTemplate as a ROS controller
+
+*/
