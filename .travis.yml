@@ -97,7 +97,7 @@ install:
   # Create the devel/setup.bash (run catkin_make with an empty workspace) and
   # source it to set the path variables.
   - cd ~/catkin_ws
-  - catkin_make -DCMAKE_CXX_COMPILER=/usr/bin/g++-4.9 install
+  - catkin_make install
   - source devel/setup.bash
   # Add the package under integration to the workspace using a symlink.
   - cd ~/catkin_ws/src
