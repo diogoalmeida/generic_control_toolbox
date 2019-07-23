@@ -4,6 +4,7 @@ This ROS package defines libraries that are generic to the control algorithms
 used in my research, in an attempt to maximize code re-usability.
 
 [ROS-wiki page](https://wiki.ros.org/generic_control_toolbox).
+
 [Tutorials](https://wiki.ros.org/generic_control_toolbox/Tutorials)
 
 ## Dependencies
