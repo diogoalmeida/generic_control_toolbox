@@ -266,6 +266,7 @@ bool ControllerTemplate<ActionClass, ActionGoal, ActionFeedback,
                         ActionResult>::goalCB()
 {
   boost::shared_ptr<const ActionGoal> goal = action_server_->acceptNewGoal();
+  acquired_goal_ = false;
 
   if (!parseGoal(goal))
   {

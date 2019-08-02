@@ -42,8 +42,8 @@
 
 ################################################################################
 
-# Use ubuntu trusty (14.04) with sudo privileges.
-dist: trusty
+# Use ubuntu bionic (18.04) with sudo privileges.
+dist: bionic
 sudo: required
 language:
   - generic
@@ -54,7 +54,7 @@ cache:
 # trigger a build matrix for different ROS distributions if desired.
 env:
   global:
-    - ROS_DISTRO=indigo
+    - ROS_DISTRO=melodic
     - ROS_CI_DESKTOP="`lsb_release -cs`"  # e.g. [precise|trusty|...]
     - CI_SOURCE_PATH=$(pwd)
     - ROSINSTALL_FILE=$CI_SOURCE_PATH/.travis_rosinstall
@@ -81,9 +81,9 @@ before_install:
   - sudo apt-get install libboost-dev
   - sudo apt-get install libarmadillo-dev
   - sudo apt-get install ros-$ROS_DISTRO-ros-control ros-$ROS_DISTRO-ros-controllers
+  - sudo apt-get install ros-$ROS_DISTRO-tf-conversions
   - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
   - sudo apt-get update
-  - sudo apt-get install gcc-4.9 g++-4.9
   - source /opt/ros/$ROS_DISTRO/setup.bash
   # Prepare rosdep to install dependencies.
   - sudo rosdep init
@@ -97,7 +97,7 @@ install:
   # Create the devel/setup.bash (run catkin_make with an empty workspace) and
   # source it to set the path variables.
   - cd ~/catkin_ws
-  - catkin_make -DCMAKE_CXX_COMPILER=/usr/bin/g++-4.9 install
+  - catkin_make install
   - source devel/setup.bash
   # Add the package under integration to the workspace using a symlink.
   - cd ~/catkin_ws/src

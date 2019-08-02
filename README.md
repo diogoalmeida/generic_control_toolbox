@@ -1,33 +1,11 @@
 Generic control toolbox  [![Build Status](https://travis-ci.org/diogoalmeida/generic_control_toolbox.svg?branch=trac-ik)](https://travis-ci.org/diogoalmeida/generic_control_toolbox)
 ========
 This ROS package defines libraries that are generic to the control algorithms
-used in my research, in an attempt to maximize code re-usability. [ROS-wiki page](https://wiki.ros.org/generic_control_toolbox).
+used in my research, in an attempt to maximize code re-usability.
 
-## Provided libraries
+[ROS-wiki page](https://wiki.ros.org/generic_control_toolbox)
 
-#### Controller template
-
-Provides a generic template for defining robot controllers with an [actionlib](http://wiki.ros.org/actionlib) interface. Maintains an actionlib server and automatically stops/starts the controller based on the current action state. Communicates over ``joint_states`` messages.
-
-#### Controller action node
-
-In robot systems that do not provide a ROS control implementation, this class will implement the loop of subscribing to the robot ``joint_states`` topic and publish a ``joint_states`` message with the desired controller output.
-
-#### KDL Manager
-
-Implements several utility methods for using KDL, and allows managing several kinematic chains simultaneously, and interfacing between ``sensor_msgs/JointState`` messages and KDL formats.
-
-#### Wrench manager
-
-Utility class to interface with several force-torque sensors and converting measurements to a configurable point.
-
-#### Matrix parser
-
-Allows parsing a matrix from a ROS parameter.
-
-#### Marker manager
-
-Facilitates publishing markers in ROS.
+[Tutorials](https://wiki.ros.org/generic_control_toolbox/Tutorials)
 
 ## Dependencies
 
