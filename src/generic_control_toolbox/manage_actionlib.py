@@ -3,6 +3,7 @@ import sys
 
 import actionlib
 import rospy
+import time
 """
     @package manage_actionlib
     This module provides utility methods for setting up actionlib calls through an overarching actionlib server.
@@ -30,7 +31,12 @@ def monitor_action_goal(action_server,
     success = False
     rospy.loginfo("Sending goal to " + action_name)
     action_client.send_goal(action_goal)
-    init_time = rospy.Time.now()
+    init_time = rospy.Time(0)
+
+    while init_time == rospy.Time(0):
+        init_time = rospy.Time.now()
+        time.sleep(0.01)
+
     while action_server.is_active():
         if (rospy.Time.now() - init_time).to_sec() > time_limit:
             rospy.logwarn("Timeout of request")
@@ -74,6 +80,6 @@ def monitor_action_goal(action_server,
             success = True
             break
 
-        rospy.sleep(0.1)
+        time.sleep(0.1)
 
     return success
