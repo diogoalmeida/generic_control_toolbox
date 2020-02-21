@@ -129,6 +129,8 @@ bool RosControlInterface<JointInterface>::init(JointInterface* hw,
   }
 
   controller_->resetInternalState();
+
+  return true;
 }
 
 template <class JointInterface>
