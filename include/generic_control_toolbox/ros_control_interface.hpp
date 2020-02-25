@@ -95,7 +95,13 @@ bool RosControlInterface<JointInterface>::init(JointInterface* hw,
   // joint initialization from
   // https://github.com/ros-controls/ros_controllers/blob/melodic-devel/effort_controllers/src/joint_group_position_controller.cpp
 
-  joint_names_ = hw->getNames();
+  // joint_names_ = hw->getNames();
+  if (!nh.getParam("joints", joint_names_))
+  {
+    ROS_ERROR("Missing joint names parameter");
+    return false;
+  }
+
   n_joints_ = joint_names_.size();
 
   // Get URDF
