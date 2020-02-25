@@ -39,16 +39,19 @@ bool getArmInfo(const std::string &arm_name, ArmInfo &info, ros::NodeHandle &nh)
 
   info.has_ft_sensor = has_ft_sensor;
 
-  if (!nh.getParam(arm_name + "/sensor_frame", info.sensor_frame))
+  if (has_ft_sensor)
   {
-    ROS_ERROR("Missing sensor info (%s/sensor_frame)", arm_name.c_str());
-    return false;
-  }
+    if (!nh.getParam(arm_name + "/sensor_frame", info.sensor_frame))
+    {
+      ROS_ERROR("Missing sensor info (%s/sensor_frame)", arm_name.c_str());
+      return false;
+    }
 
-  if (!nh.getParam(arm_name + "/sensor_topic", info.sensor_topic))
-  {
-    ROS_ERROR("Missing sensor info (%s/sensor_topic)", arm_name.c_str());
-    return false;
+    if (!nh.getParam(arm_name + "/sensor_topic", info.sensor_topic))
+    {
+      ROS_ERROR("Missing sensor info (%s/sensor_topic)", arm_name.c_str());
+      return false;
+    }
   }
 
   info.name = arm_name;
