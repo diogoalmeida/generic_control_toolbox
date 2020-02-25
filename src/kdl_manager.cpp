@@ -298,6 +298,49 @@ bool KDLManager::getJointState(const std::string &end_effector_link,
   return getJointState(end_effector_link, q, qdot, state);
 }
 
+bool KDLManager::createJointState(const std::string &end_effector_link,
+                                  const Eigen::VectorXd &q,
+                                  const Eigen::VectorXd &qdot,
+                                  sensor_msgs::JointState &state) const
+{
+  sensor_msgs::JointState ret;
+  if (q.rows() != qdot.rows())
+  {
+    ROS_ERROR(
+        "Given joint state with a different number of joint positions and "
+        "velocities");
+    return false;
+  }
+
+  if (chain_.find(end_effector_link) == chain_.end())
+  {
+    return false;
+  }
+
+  if (chain_.at(end_effector_link).getNrOfJoints() != qdot.rows())
+  {
+    ROS_ERROR(
+        "Joint chain for eef %s has a different number of joints than the "
+        "provided",
+        end_effector_link.c_str());
+    return false;
+  }
+
+  state.name.resize(actuated_joint_names_.at(end_effector_link).size());
+  state.position.resize(actuated_joint_names_.at(end_effector_link).size());
+  state.velocity.resize(actuated_joint_names_.at(end_effector_link).size());
+  state.effort.resize(actuated_joint_names_.at(end_effector_link).size());
+  for (unsigned long i = 0;
+       i < actuated_joint_names_.at(end_effector_link).size(); i++)
+  {
+    state.name[i] = actuated_joint_names_.at(end_effector_link)[i];
+    state.position[i] = q[i];
+    state.velocity[i] = qdot[i];
+  }
+
+  return true;
+}
+
 bool KDLManager::getJointState(const std::string &end_effector_link,
                                const Eigen::VectorXd &q,
                                const Eigen::VectorXd &qdot,

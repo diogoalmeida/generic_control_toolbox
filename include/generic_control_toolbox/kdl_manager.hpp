@@ -96,6 +96,18 @@ class KDLManager : public ManagerBase
                       const std::string &sensor_point_frame);
 
   /**
+    Create a joint state message for the given end-effector link with the
+  desired joint position and velocities.
+
+    @param end_effector_link The chain's end_effector.
+    @param qdot The chain's joint velocities.
+    @param state The generated joint state message.
+    @return False if something goes wrond.
+  **/
+  bool createJointState(const std::string &end_effector_link,
+                        const Eigen::VectorXd &q, const Eigen::VectorXd &qdot,
+                        sensor_msgs::JointState &state) const;
+  /**
     Fills the joint state message given only joint velocities. Joint positions
   are taken from the joint state message.
 
