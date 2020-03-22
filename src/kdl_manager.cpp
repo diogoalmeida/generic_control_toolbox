@@ -169,6 +169,12 @@ bool KDLManager::initializeArmCommon(const std::string &end_effector_link)
     ROS_ERROR_STREAM("Failed to find chain <" << chain_base_link_ << ", "
                                               << end_effector_link
                                               << "> in the kinematic tree");
+    ROS_DEBUG("Existing tree: ");
+    auto tree_map = tree.getSegments();
+    for (auto it = tree_map.begin(); it != tree_map.end(); it++)
+    {
+      ROS_DEBUG_STREAM(it->first);
+    }
     return false;
   }
 
