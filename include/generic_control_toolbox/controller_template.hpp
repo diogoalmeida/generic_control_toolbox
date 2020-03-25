@@ -318,6 +318,7 @@ template <class ActionClass, class ActionGoal, class ActionFeedback,
 ControllerTemplate<ActionClass, ActionGoal, ActionFeedback,
                    ActionResult>::~ControllerTemplate()
 {
+  action_server_->shutdown();
 }
 
 template <class ActionClass, class ActionGoal, class ActionFeedback,
