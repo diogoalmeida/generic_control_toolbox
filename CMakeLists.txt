@@ -49,7 +49,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES matrix_parser kdl_manager wrench_manager controller_template
             marker_manager controller_action_node ros_control_interface
-            bag_manager
+            bag_manager tf_manager
 )
 
 include_directories(
@@ -88,5 +88,9 @@ add_dependencies(controller_action_node ${catkin_EXPORTED_TARGETS} ${${PROJECT_N
 add_library(ros_control_interface src/ros_control_interface.cpp)
 target_link_libraries(ros_control_interface ${catkin_LIBRARIES})
 add_dependencies(ros_control_interface ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+add_library(tf_manager src/tf_manager.cpp)
+target_link_libraries(tf_manager ${catkin_LIBRARIES})
+add_dependencies(tf_manager ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
 install(PROGRAMS src/generic_control_toolbox/manage_actionlib.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
