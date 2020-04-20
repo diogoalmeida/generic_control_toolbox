@@ -50,7 +50,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES matrix_parser kdl_manager wrench_manager controller_template
             marker_manager controller_action_node ros_control_interface
-            bag_manager tf_manager
+            bag_manager tf_manager joint_position_integrator
 )
 
 include_directories(
@@ -94,4 +94,19 @@ add_library(tf_manager src/tf_manager.cpp)
 target_link_libraries(tf_manager ${catkin_LIBRARIES})
 add_dependencies(tf_manager ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
+add_library(joint_position_integrator src/joint_position_integrator.cpp)
+target_link_libraries(joint_position_integrator ${catkin_LIBRARIES})
+add_dependencies(joint_position_integrator ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
 install(PROGRAMS src/generic_control_toolbox/manage_actionlib.py DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
+if (CATKIN_ENABLE_TESTING)
+  find_package(rostest REQUIRED)
+
+  add_rostest_gtest(test_joint_position_integrator 
+                    test/ros_tests/joint_position_integrator.test 
+                    test/ros_tests/test_joint_position_integrator.cpp 
+                    src/joint_position_integrator.cpp)
+  target_link_libraries(test_joint_position_integrator ${catkin_LIBRARIES})
+  add_dependencies(test_joint_position_integrator ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
+endif()
