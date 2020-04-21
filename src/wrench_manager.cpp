@@ -68,18 +68,20 @@ bool WrenchManager::initializeWrenchComm(
   Eigen::MatrixXd C;
   if (!parser_.parseMatrixData(C, calib_matrix_param, nh_))
   {
-    ROS_ERROR(
+    ROS_WARN(
         "WrenchManager: missing force torque sensor calibration matrix "
-        "parameter %s",
+        "parameter %s. Setting default.",
         calib_matrix_param.c_str());
-    return false;
+    C = Eigen::Matrix<double, 6, 6>::Identity();
   }
-
-  if (C.cols() != 6 || C.rows() != 6)
+  else
   {
-    ROS_ERROR("WrenchManager: calibration matrix must be 6x6. Got %ldx%ld",
-              C.rows(), C.cols());
-    return false;
+    if (C.cols() != 6 || C.rows() != 6)
+    {
+      ROS_ERROR("WrenchManager: calibration matrix must be 6x6. Got %ldx%ld",
+                C.rows(), C.cols());
+      return false;
+    }
   }
 
   // Everything is ok, can add new comm.
@@ -150,7 +152,8 @@ void WrenchManager::forceTorqueCB(
   if (eef.empty())
   {
     ROS_ERROR(
-        "WrenchManager: got wrench message from sensor at frame %s, which was "
+        "WrenchManager: got wrench message from sensor at frame %s, which "
+        "was "
         "not configured in the wrench manager",
         msg->header.frame_id.c_str());
     return;

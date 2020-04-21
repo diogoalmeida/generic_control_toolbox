@@ -27,8 +27,8 @@ bool MatrixParser::parseMatrixData(Eigen::MatrixXd &M,
   }
   else
   {
-    ROS_ERROR_STREAM("MatrixParser: Configuration name " << param_name
-                                                         << " does not exist");
+    ROS_WARN_STREAM("MatrixParser: Configuration name " << param_name
+                                                        << " does not exist");
     return false;
   }
 
