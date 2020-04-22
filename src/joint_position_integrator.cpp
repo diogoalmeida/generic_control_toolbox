@@ -40,6 +40,30 @@ KDL::JntArray JointPositionIntegrator::update(const KDL::JntArray& q_dot,
   return virt_q_;
 }
 
+Eigen::VectorXd JointPositionIntegrator::update(const Eigen::VectorXd& q_dot,
+                                                const Eigen::VectorXd& q,
+                                                float dt)
+{
+  KDL::JntArray qdotk(q_dot.rows()), qk(q.rows()), outk;
+  Eigen::VectorXd out;
+
+  for (unsigned int i = 0; i < q_dot.rows(); i++)
+  {
+    qdotk(i) = q_dot[i];
+    qk(i) = q[i];
+  }
+
+  outk = update(qdotk, qk, dt);
+  out.resize(outk.rows());
+
+  for (unsigned int i = 0; i < outk.rows(); i++)
+  {
+    out[i] = outk(i);
+  }
+
+  return out;
+}
+
 bool JointPositionIntegrator::init()
 {
   if (!nh_.getParam("max_joint_error", max_joint_error_))
