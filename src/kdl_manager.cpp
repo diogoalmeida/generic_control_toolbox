@@ -1094,6 +1094,18 @@ bool KDLManager::getNumJoints(const std::string &end_effector_link,
   return true;
 }
 
+bool KDLManager::addSegment(const std::string &end_effector_link,
+                            KDL::Segment &new_segment)
+{
+  if (chain_.find(end_effector_link) == chain_.end())
+  {
+    return false;
+  }
+
+  chain_.at(end_effector_link).addSegment(new_segment);
+  return true;
+}
+
 bool setKDLManager(const ArmInfo &arm_info, std::shared_ptr<KDLManager> manager)
 {
   if (!manager->initializeArm(arm_info.kdl_eef_frame))

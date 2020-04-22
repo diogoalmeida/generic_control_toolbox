@@ -30,6 +30,8 @@ class JointPositionIntegrator
    **/
   KDL::JntArray update(const KDL::JntArray &q_dot, const KDL::JntArray &q,
                        float dt);
+  Eigen::VectorXd update(const Eigen::VectorXd &q_dot, const Eigen::VectorXd &q,
+                         float dt);
 
   /**
    * Reset the integrator's state.
