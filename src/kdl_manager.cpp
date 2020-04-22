@@ -690,7 +690,14 @@ bool KDLManager::getInertia(const std::string &end_effector_link,
   }
 
   KDL::JntArray q(chain_.at(end_effector_link).getNrOfJoints());
+  KDL::JntArrayVel q_dot(chain_.at(end_effector_link).getNrOfJoints());
   KDL::JntSpaceInertiaMatrix B(chain_.at(end_effector_link).getNrOfJoints());
+
+  if (!getChainJointState(state, end_effector_link, q, q_dot))
+  {
+    return false;
+  }
+
   dynamic_chain_.at(end_effector_link)->JntToMass(q, B);
 
   H = B.data;
