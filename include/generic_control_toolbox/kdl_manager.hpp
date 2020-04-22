@@ -391,6 +391,19 @@ class KDLManager : public ManagerBase
   bool getNumJoints(const std::string &end_effector_link,
                     unsigned int &num_joints) const;
 
+  /**
+    Adds a new segment at the end of the requested chain. WARNING: The intended
+  use case is to facilitate dynamic computations when the robot has a load that
+  is not included in the chain's definition, e.g., a complex gripper. KDL does
+  not support removing segments, so this should not be used to set a variable
+  load.
+
+    @param end_effector_link The name of the requested end-effector.
+    @param new_segment A new segment to be added at the end of a chain.
+  **/
+  bool addSegment(const std::string &end_effector_link,
+                  KDL::Segment &new_segment);
+
  private:
   typedef KDL::ChainIkSolverVel IkSolverVel;
   typedef KDL::ChainIkSolverPos_LMA IkSolverPos;
