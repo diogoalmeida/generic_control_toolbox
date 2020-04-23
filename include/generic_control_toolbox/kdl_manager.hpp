@@ -491,6 +491,11 @@ class KDLManager : public ManagerBase
     @return True if the joint was found in the kinematic chain, false otherwise.
   **/
   bool hasJoint(const KDL::Chain &chain, const std::string &joint_name) const;
+
+  /**
+   *  Updates the internal data structures of all solvers.
+   **/
+  void updateSolvers();
 };
 
 /**

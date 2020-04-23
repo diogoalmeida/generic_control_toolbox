@@ -1110,7 +1110,19 @@ bool KDLManager::addSegment(const std::string &end_effector_link,
   }
 
   chain_.at(end_effector_link).addSegment(new_segment);
+  updateSolvers();
   return true;
+}
+
+void KDLManager::updateSolvers()
+{
+  for (auto const &item : chain_)
+  {
+    ikvel_[item.first]->updateInternalDataStructures();
+    fkpos_[item.first]->updateInternalDataStructures();
+    jac_solver_[item.first]->updateInternalDataStructures();
+    dynamic_chain_[item.first]->updateInternalDataStructures();
+  }
 }
 
 bool setKDLManager(const ArmInfo &arm_info, std::shared_ptr<KDLManager> manager)
