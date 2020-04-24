@@ -1062,6 +1062,7 @@ bool KDLManager::getChainJointState(
         velocities.q(processed_joints) = current_state.position[j];
         velocities.qdot(processed_joints) = current_state.velocity[j];
         processed_joints++;
+        break;
       }
     }
   }
