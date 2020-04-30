@@ -34,7 +34,7 @@ bool TFManager::getPoseInFrame(const std::string &frame,
   if (!success)
   {
     ROS_ERROR_STREAM("TFManager: Failed to get the target pose from frame "
-                     << pose.header.stamp << " in frame " << frame);
+                     << pose.header.frame_id << " in frame " << frame);
   }
 
   return success;
