@@ -92,6 +92,16 @@ class ControllerTemplate : public ControllerBase
   virtual void resetController() = 0;
 
   /**
+   *  Overload and set to true if you want the control algorithm to be called
+   *when there is no active goal. Do this when you want a custom behavior when
+   *the controller is iddle, as opposed to returning lastState.
+   *
+   * @param returns False, meaning the controller will return lastState when no
+   *active goal exists. True, if the controlAlgorithm is to be called instead.
+   **/
+  virtual bool customDefaultBehavior() { return false; };
+
+  /**
   Return the last controlled joint state. If the controller does not have
   an active actionlib goal, it will set the references of the joint controller
   to the last desired position (and null velocity).
@@ -152,9 +162,12 @@ sensor_msgs::JointState ControllerTemplate<
     ActionResult>::updateControl(const sensor_msgs::JointState &current_state,
                                  const ros::Duration &dt)
 {
-  if (!action_server_->isActive() || !acquired_goal_)
+  if (!customDefaultBehavior())
   {
-    return lastState(current_state);
+    if (!action_server_->isActive() || !acquired_goal_)
+    {
+      return lastState(current_state);
+    }
   }
 
   ROS_DEBUG_THROTTLE(10, "Calling %s control algorithm", action_name_.c_str());
