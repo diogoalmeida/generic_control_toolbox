@@ -46,6 +46,19 @@ class MatrixParser
   **/
   static void initializeEigenMatrix(Eigen::MatrixXd &M,
                                     const std::vector<double> &vals);
+
+  /**
+    Fill in a rows x cols matrix with the given values.
+
+    @param M The matrix to be filled in. Will be set to the size nxn.
+    @param vals A vector with the values to fill in
+    @param rows The number of rows in the matrix.
+    @param cols The number of cols.
+    @throw logic_error in case the rows or cols have invalid numbers.
+   **/
+  static void initializeEigenMatrix(Eigen::MatrixXd &M,
+                                    const std::vector<double> &vals, int rows,
+                                    int cols);
 };
 }  // namespace generic_control_toolbox
 

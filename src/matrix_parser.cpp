@@ -10,12 +10,29 @@ bool MatrixParser::parseMatrixData(Eigen::MatrixXd &M,
                                    const ros::NodeHandle &n)
 {
   std::vector<double> vals;
+  int rows, cols;
   if (n.hasParam(param_name.c_str()))
   {
     if (n.hasParam((param_name + std::string("/data").c_str())))
     {
       n.getParam((param_name + std::string("/data")).c_str(), vals);
-      initializeEigenMatrix(M, vals);
+
+      if (n.hasParam((param_name + std::string("/rows").c_str())) &&
+          n.hasParam((param_name + std::string("/cols").c_str())))
+      {
+        n.getParam((param_name + std::string("/rows")).c_str(), rows);
+        n.getParam((param_name + std::string("/cols")).c_str(), cols);
+
+        initializeEigenMatrix(M, vals, rows, cols);
+      }
+      else
+      {
+        ROS_WARN_STREAM("MatrixParser: Assuming square matrix for "
+                        << param_name
+                        << ". You can set dimensions by setting the parameter "
+                           "/rows and /cols");
+        initializeEigenMatrix(M, vals);
+      }
     }
     else
     {
@@ -33,7 +50,7 @@ bool MatrixParser::parseMatrixData(Eigen::MatrixXd &M,
   }
 
   return true;
-}
+}  // namespace generic_control_toolbox
 
 void MatrixParser::initializeEigenMatrix(Eigen::MatrixXd &M,
                                          const std::vector<double> &vals)
@@ -63,6 +80,31 @@ void MatrixParser::initializeEigenMatrix(Eigen::MatrixXd &M,
     for (int j = 0; j < size; j++)
     {
       M(i, j) = vals[i * size + j];
+    }
+  }
+}
+
+void MatrixParser::initializeEigenMatrix(Eigen::MatrixXd &M,
+                                         const std::vector<double> &vals,
+                                         int rows, int cols)
+{
+  if (rows <= 0 || cols <= 0)
+  {
+    std::stringstream errMsg;
+    errMsg << "MatrixParser: Tried to initialize a matrix with dims " << rows
+           << "x" << cols;
+    throw std::logic_error(errMsg.str().c_str());
+  }
+
+  ROS_DEBUG("MatrixParser: filling matrix");
+
+  M = Eigen::MatrixXd(rows, cols);
+
+  for (int i = 0; i < rows; i++)
+  {
+    for (int j = 0; j < cols; j++)
+    {
+      M(i, j) = vals[i * rows + j];
     }
   }
 }
