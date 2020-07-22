@@ -1,5 +1,5 @@
 <launch>
   <test test-name="joint_position_integrator" pkg="generic_control_toolbox" type="test_joint_position_integrator">
-    <rosparam command="load" file="$(find generic_control_toolbox)/test/ros_tests/test_params.yaml"/>
+    <rosparam command="load" file="$(find generic_control_toolbox)/test/ros_tests/joint_position_params.yaml"/>
   </test>
 </launch>

@@ -109,4 +109,11 @@ if (CATKIN_ENABLE_TESTING)
                     src/joint_position_integrator.cpp)
   target_link_libraries(test_joint_position_integrator ${catkin_LIBRARIES})
   add_dependencies(test_joint_position_integrator ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
+
+  add_rostest_gtest(test_matrix_parser 
+                    test/ros_tests/matrix_parser.test 
+                    test/ros_tests/test_matrix_parser.cpp 
+                    src/joint_position_integrator.cpp)
+  target_link_libraries(test_matrix_parser matrix_parser ${catkin_LIBRARIES})
+  add_dependencies(test_matrix_parser ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 endif()

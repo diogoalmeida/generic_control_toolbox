@@ -72,16 +72,7 @@ void MatrixParser::initializeEigenMatrix(Eigen::MatrixXd &M,
   }
 
   ROS_DEBUG("MatrixParser: filling matrix");
-
-  M = Eigen::MatrixXd(size, size);
-
-  for (int i = 0; i < size; i++)
-  {
-    for (int j = 0; j < size; j++)
-    {
-      M(i, j) = vals[i * size + j];
-    }
-  }
+  initializeEigenMatrix(M, vals, size, size);
 }
 
 void MatrixParser::initializeEigenMatrix(Eigen::MatrixXd &M,
@@ -100,11 +91,12 @@ void MatrixParser::initializeEigenMatrix(Eigen::MatrixXd &M,
 
   M = Eigen::MatrixXd(rows, cols);
 
-  for (int i = 0; i < rows; i++)
+  int idx = 0;
+  for (unsigned int i = 0; i < rows; i++)
   {
-    for (int j = 0; j < cols; j++)
+    for (unsigned int j = 0; j < cols; j++)
     {
-      M(i, j) = vals[i * rows + j];
+      M(i, j) = vals[idx++];
     }
   }
 }
