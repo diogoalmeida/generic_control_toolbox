@@ -1,0 +1,5 @@
+<launch>
+  <test test-name="matrix_parser" pkg="generic_control_toolbox" type="test_matrix_parser">
+    <rosparam command="load" file="$(find generic_control_toolbox)/test/ros_tests/matrix_parser_params.yaml"/>
+  </test>
+</launch>
