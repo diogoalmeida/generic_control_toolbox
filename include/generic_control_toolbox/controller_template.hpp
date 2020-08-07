@@ -326,10 +326,7 @@ void ControllerTemplate<ActionClass, ActionGoal, ActionFeedback,
 {
   action_server_->setPreempted(result_);
   ROS_WARN("%s preempted!", action_name_.c_str());
-  if (!customDefaultBehavior())
-  {
-    resetInternalState();
-  }
+  resetInternalState();
 }
 
 template <class ActionClass, class ActionGoal, class ActionFeedback,
