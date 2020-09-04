@@ -905,8 +905,26 @@ bool KDLManager::getGrippingVelIK(const std::string &end_effector_link,
                                   const KDL::Twist &in,
                                   KDL::JntArray &out) const
 {
+  KDL::Twist modified_in;
+
+  if (!grippingTwistToEef(end_effector_link, state, in, modified_in))
+  {
+    return false;
+  }
+
+  if (!getVelIK(end_effector_link, state, modified_in, out))
+  {
+    return false;
+  }
+
+  return true;
+}
+
+bool KDLManager::grippingTwistToEef(const std::string &end_effector_link,
+                                    const sensor_msgs::JointState &state,
+                                    const KDL::Twist &in, KDL::Twist &out) const
+{
   KDL::Frame pgrip, peef;
-  KDL::Twist modified_in, rotated_in;
 
   if (chain_.find(end_effector_link) == chain_.end())
   {
@@ -925,23 +943,17 @@ bool KDLManager::getGrippingVelIK(const std::string &end_effector_link,
 
   // convert the input twist (in the gripping frame) to the base frame
   Eigen::Vector3d vel_eig, rot_eig, peef_eig, pgrip_eig;
-  modified_in = pgrip.M * in;
+  out = pgrip.M * in;
 
   tf::vectorKDLToEigen(peef.p, peef_eig);
   tf::vectorKDLToEigen(pgrip.p, pgrip_eig);
-  tf::vectorKDLToEigen(modified_in.vel, vel_eig);
-  tf::vectorKDLToEigen(modified_in.rot, rot_eig);
+  tf::vectorKDLToEigen(out.vel, vel_eig);
+  tf::vectorKDLToEigen(out.rot, rot_eig);
 
   vel_eig = MatrixParser::computeSkewSymmetric(pgrip_eig - peef_eig) * rot_eig +
             vel_eig;
 
-  tf::vectorEigenToKDL(vel_eig, modified_in.vel);
-
-  if (!getVelIK(end_effector_link, state, modified_in, out))
-  {
-    return false;
-  }
-
+  tf::vectorEigenToKDL(vel_eig, out.vel);
   return true;
 }
 

@@ -258,8 +258,23 @@ class KDLManager : public ManagerBase
                         const KDL::Twist &in, KDL::JntArray &out) const;
 
   /**
-    Returns the inverse differential kinematics of the requested end-effector,
-  given a desired twist.
+   *  Convert an input twist expressed in the chain's gripping frame to an
+   *equivalent twist at the end-effector. Assumes  rigid linkage between the two
+   *frames.
+   *
+   * @param end_effector_link The name of the requested end-effector.
+   * @param state The current robot_joint state
+   * @param in Gripping point twist, in the gripping point frame.
+   * @param out End-effector twist, in the end-effector frame.
+   * @return False in case something goes wrong, true otherwise.
+   **/
+  bool grippingTwistToEef(const std::string &end_effector_link,
+                          const sensor_msgs::JointState &state,
+                          const KDL::Twist &in, KDL::Twist &out) const;
+
+  /**
+    Returns the inverse differential kinematics of the requested
+  end-effector, given a desired twist.
 
     @param end_effector_link The name of the requested end-effector.
     @param state The current robot joint state.
