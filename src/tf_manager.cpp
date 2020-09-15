@@ -16,6 +16,7 @@ bool TFManager::getPoseInFrame(const std::string &frame,
 {
   int attempts = 0;
   bool success = false;
+  std::string error;
   while (attempts < max_tf_attempts_)
   {
     try
@@ -28,13 +29,15 @@ bool TFManager::getPoseInFrame(const std::string &frame,
     {
       attempts++;
       ros::Duration(0.1).sleep();
+      error = ex.what();
     }
   }
 
   if (!success)
   {
     ROS_ERROR_STREAM("TFManager: Failed to get the target pose from frame "
-                     << pose.header.frame_id << " in frame " << frame);
+                     << pose.header.frame_id << " in frame " << frame
+                     << ". Exception: " << error);
   }
 
   return success;
