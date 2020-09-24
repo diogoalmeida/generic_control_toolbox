@@ -14,21 +14,17 @@ WrenchManager::WrenchManager(ros::NodeHandle nh) : nh_(nh)
 
 WrenchManager::~WrenchManager() {}
 
-bool WrenchManager::initializeWrenchComm(
-    const std::string &end_effector, const std::string &sensor_frame,
-    const std::string &gripping_point_frame, const std::string &sensor_topic,
-    const std::string &calib_matrix_param)
+bool WrenchManager::setGrippingPoint(const std::string &end_effector,
+                                     const std::string &sensor_frame,
+                                     const std::string &gripping_point_frame)
 {
-  if (sensor_frame_.find(end_effector) != sensor_frame_.end())
+  if (sensor_frame_.find(end_effector) == sensor_frame_.end())
   {
-    ROS_ERROR(
-        "Cannot initialize wrench subscriber for end-effector %s: already "
-        "initialized",
-        end_effector.c_str());
+    ROS_ERROR("Cannot set gripping point for end-effector %s: not initialized",
+              end_effector.c_str());
     return false;
   }
 
-  // get rigid transform between sensor frame and arm gripping point
   geometry_msgs::PoseStamped sensor_to_gripping_point;
   sensor_to_gripping_point.header.frame_id = sensor_frame;
   sensor_to_gripping_point.header.stamp = ros::Time(0);
@@ -65,6 +61,35 @@ bool WrenchManager::initializeWrenchComm(
     return false;
   }
 
+  KDL::Frame sensor_to_gripping_point_kdl;
+  tf::poseMsgToKDL(sensor_to_gripping_point.pose, sensor_to_gripping_point_kdl);
+  sensor_to_gripping_point_[end_effector] = sensor_to_gripping_point_kdl;
+  gripping_frame_[end_effector] = gripping_point_frame;
+  return true;
+}
+
+bool WrenchManager::initializeWrenchComm(
+    const std::string &end_effector, const std::string &sensor_frame,
+    const std::string &gripping_point_frame, const std::string &sensor_topic,
+    const std::string &calib_matrix_param)
+{
+  if (sensor_frame_.find(end_effector) != sensor_frame_.end())
+  {
+    ROS_ERROR(
+        "Cannot initialize wrench subscriber for end-effector %s: already "
+        "initialized",
+        end_effector.c_str());
+    return false;
+  }
+
+  sensor_frame_[end_effector] = sensor_frame;
+  // get rigid transform between sensor frame and arm gripping point
+  if (!setGrippingPoint(end_effector, sensor_frame, gripping_point_frame))
+  {
+    sensor_frame_.erase(end_effector);
+    return false;
+  }
+
   Eigen::MatrixXd C;
   if (!parser_.parseMatrixData(C, calib_matrix_param, nh_))
   {
@@ -80,20 +105,16 @@ bool WrenchManager::initializeWrenchComm(
     {
       ROS_ERROR("WrenchManager: calibration matrix must be 6x6. Got %ldx%ld",
                 C.rows(), C.cols());
+      sensor_frame_.erase(end_effector);
       return false;
     }
   }
 
   // Everything is ok, can add new comm.
-  KDL::Frame sensor_to_gripping_point_kdl;
   calibration_matrix_[end_effector] = C;
-  tf::poseMsgToKDL(sensor_to_gripping_point.pose, sensor_to_gripping_point_kdl);
-  sensor_frame_[end_effector] = sensor_frame;
-  sensor_to_gripping_point_[end_effector] = sensor_to_gripping_point_kdl;
   measured_wrench_[end_effector] = KDL::Wrench::Zero();
   ft_sub_[end_effector] =
       nh_.subscribe(sensor_topic, 1, &WrenchManager::forceTorqueCB, this);
-  gripping_frame_[end_effector] = gripping_point_frame;
   processed_ft_pub_[end_effector] = nh_.advertise<geometry_msgs::WrenchStamped>(
       sensor_topic + "_converted", 1);
 

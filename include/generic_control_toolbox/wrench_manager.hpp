@@ -42,6 +42,18 @@ class WrenchManager : public ManagerBase
                             const std::string &calib_matrix_param);
 
   /**
+   *  Set the gripping point for the given end-effector's arm.
+   *
+   * @param end_effector The sensor arm's end-effector.
+   * @param sensor_frame The TF frame name that represents the sensor pose.
+   * @param gripping_point_frame The TF frame that represents the gripping point
+   *pose.
+   **/
+  bool setGrippingPoint(const std::string &end_effector,
+                        const std::string &sensor_frame,
+                        const std::string &gripping_point_frame);
+
+  /**
     Provides access to the measured wrench at the arm's gripping point.
     Wrench is expressed in the point's frame.
 
