@@ -18,7 +18,8 @@ find_package(
   realtime_tools
   hardware_interface
   controller_interface
-  tf
+  tf2
+  tf2_geometry_msgs
 )
 
 catkin_python_setup()
@@ -46,7 +47,7 @@ catkin_package(
   CATKIN_DEPENDS rosbag roscpp rospy actionlib geometry_msgs visualization_msgs
                  cmake_modules eigen_conversions kdl_parser sensor_msgs
                  tf_conversions realtime_tools hardware_interface
-                 controller_interface tf trac_ik_lib
+                 controller_interface tf2 tf2_geometry_msgs trac_ik_lib
   INCLUDE_DIRS include
   LIBRARIES matrix_parser kdl_manager wrench_manager controller_template
             marker_manager controller_action_node ros_control_interface
