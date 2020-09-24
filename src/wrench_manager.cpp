@@ -2,7 +2,15 @@
 
 namespace generic_control_toolbox
 {
-WrenchManager::WrenchManager(ros::NodeHandle nh) : nh_(nh), tf_manager_(nh) {}
+WrenchManager::WrenchManager(ros::NodeHandle nh) : nh_(nh)
+{
+  if (!nh_.getParam("wrench_manager/max_tf_attempts", max_tf_attempts_))
+  {
+    ROS_WARN(
+        "WrenchManager: Missing max_tf_attempts parameter, setting default");
+    max_tf_attempts_ = 5;
+  }
+}
 
 WrenchManager::~WrenchManager() {}
 
@@ -32,10 +40,28 @@ bool WrenchManager::initializeWrenchComm(
   sensor_to_gripping_point.pose.orientation.z = 0;
   sensor_to_gripping_point.pose.orientation.w = 1;
 
-  if (!tf_manager_.getPoseInFrame(gripping_point_frame,
-                                  sensor_to_gripping_point,
-                                  sensor_to_gripping_point))
+  int attempts;
+  for (attempts = 0; attempts < max_tf_attempts_; attempts++)
   {
+    try
+    {
+      listener_.transformPose(gripping_point_frame, sensor_to_gripping_point,
+                              sensor_to_gripping_point);
+      break;
+    }
+    catch (tf::TransformException ex)
+    {
+      ROS_WARN("TF exception in wrench manager: %s", ex.what());
+    }
+    ros::Duration(0.1).sleep();
+  }
+
+  if (attempts >= max_tf_attempts_)
+  {
+    ROS_ERROR(
+        "WrenchManager: could not find the transform between the sensor frame "
+        "%s and gripping point %s",
+        sensor_frame.c_str(), gripping_point_frame.c_str());
     return false;
   }
 

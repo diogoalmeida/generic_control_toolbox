@@ -8,10 +8,10 @@
 #include <kdl_conversions/kdl_msg.h>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
+#include <tf/transform_listener.h>
 #include <urdf/model.h>
 #include <generic_control_toolbox/manager_base.hpp>
 #include <generic_control_toolbox/matrix_parser.hpp>
-#include <generic_control_toolbox/tf_manager.hpp>
 #include <kdl/chaindynparam.hpp>
 #include <kdl/chainfksolverpos_recursive.hpp>
 #include <kdl/chainfksolvervel_recursive.hpp>
@@ -445,12 +445,13 @@ class KDLManager : public ManagerBase
 
   urdf::Model model_;
   ros::NodeHandle nh_;
-  TFManager tf_manager_;
+  tf::TransformListener listener_;
   KDL::Vector gravity_in_chain_base_link_;
   std::map<std::string, std::vector<std::string> >
       actuated_joint_names_;  /// list of actuated joints per arm
   std::string chain_base_link_, ikvel_solver_;
-  double eps_, nso_weight_, ik_pos_tolerance_, ik_angle_tolerance_;
+  double eps_, max_tf_attempts_, nso_weight_, ik_pos_tolerance_,
+      ik_angle_tolerance_;
 
   /**
     Loads the manager parameters
