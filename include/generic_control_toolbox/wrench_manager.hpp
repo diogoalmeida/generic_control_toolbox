@@ -11,6 +11,7 @@
 #include <Eigen/Dense>
 #include <generic_control_toolbox/manager_base.hpp>
 #include <generic_control_toolbox/matrix_parser.hpp>
+#include <generic_control_toolbox/tf_manager.hpp>
 
 namespace generic_control_toolbox
 {
@@ -63,7 +64,6 @@ class WrenchManager : public ManagerBase
                            Eigen::Matrix<double, 6, 1> &wrench) const;
 
  private:
-  int max_tf_attempts_;
   std::map<std::string, std::string> sensor_frame_;
   std::map<std::string, KDL::Frame> sensor_to_gripping_point_;
   std::map<std::string, KDL::Wrench> measured_wrench_;
@@ -71,7 +71,7 @@ class WrenchManager : public ManagerBase
   std::map<std::string, ros::Publisher> processed_ft_pub_;
   std::map<std::string, std::string> gripping_frame_;
   std::map<std::string, Eigen::Matrix<double, 6, 6> > calibration_matrix_;
-  tf::TransformListener listener_;
+  TFManager tf_manager_;
   MatrixParser parser_;
   ros::NodeHandle nh_;
 

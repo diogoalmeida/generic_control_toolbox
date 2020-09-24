@@ -3,7 +3,7 @@
 namespace generic_control_toolbox
 {
 KDLManager::KDLManager(const std::string &chain_base_link, ros::NodeHandle nh)
-    : chain_base_link_(chain_base_link), nh_(nh)
+    : chain_base_link_(chain_base_link), nh_(nh), tf_manager_(nh)
 {
   if (!model_.initParam("/robot_description"))
   {
@@ -22,12 +22,6 @@ bool KDLManager::getParam()
   {
     ROS_WARN("KDLManager: Missing eps parameter, setting default");
     eps_ = 0.001;
-  }
-
-  if (!nh_.getParam("kdl_manager/max_tf_attempts", max_tf_attempts_))
-  {
-    ROS_WARN("KDLManager: Missing max_tf_attempts parameter, setting default");
-    max_tf_attempts_ = 5;
   }
 
   if (!nh_.getParam("kdl_manager/ikvel_solver", ikvel_solver_))
@@ -765,26 +759,8 @@ bool KDLManager::getRigidTransform(const std::string &base_frame,
   base_to_target.pose.orientation.z = 0;
   base_to_target.pose.orientation.w = 1;
 
-  int attempts;
-  for (attempts = 0; attempts < max_tf_attempts_; attempts++)
+  if (!tf_manager_.getPoseInFrame(target_frame, base_to_target, base_to_target))
   {
-    try
-    {
-      listener_.transformPose(target_frame, base_to_target, base_to_target);
-      break;
-    }
-    catch (tf::TransformException ex)
-    {
-      ROS_WARN("TF exception in kdl manager: %s", ex.what());
-      ros::Duration(0.1).sleep();
-    }
-  }
-
-  if (attempts >= max_tf_attempts_)
-  {
-    ROS_ERROR(
-        "KDL manager could not find the transform between frames %s and %s",
-        base_frame.c_str(), target_frame.c_str());
     return false;
   }
 
