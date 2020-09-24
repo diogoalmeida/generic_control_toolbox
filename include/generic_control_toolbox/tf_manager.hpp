@@ -3,8 +3,7 @@
 
 #include <geometry_msgs/PoseStamped.h>
 #include <ros/ros.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-#include <tf2_ros/transform_listener.h>
+#include <tf/transform_listener.h>
 #include <generic_control_toolbox/manager_base.hpp>
 
 namespace generic_control_toolbox
@@ -19,8 +18,7 @@ class TFManager : public ManagerBase
   ~TFManager() {}
 
   /**
-   *  Convert a pose to another frame using the TF tree. Handles TF
-   *exceptions.
+   *  Convert a pose to another frame using the TF tree. Handles TF exceptions.
    *
    * @param frame The target frame to which to transform the given pose.
    * @param pose The given pose.
@@ -30,15 +28,14 @@ class TFManager : public ManagerBase
    **/
   bool getPoseInFrame(const std::string &frame,
                       const geometry_msgs::PoseStamped &pose,
-                      geometry_msgs::PoseStamped &out) const;
+                      geometry_msgs::PoseStamped &out);
 
  private:
   bool getParam();
 
   ros::NodeHandle nh_;
-  double max_wait_time_;
-  tf2_ros::TransformListener listener_;
-  tf2_ros::Buffer buffer_;
+  int max_tf_attempts_;
+  tf::TransformListener listener_;
 };
 }  // namespace generic_control_toolbox
 #endif
