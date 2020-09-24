@@ -15,7 +15,6 @@ WrenchManager::WrenchManager(ros::NodeHandle nh) : nh_(nh)
 WrenchManager::~WrenchManager() {}
 
 bool WrenchManager::setGrippingPoint(const std::string &end_effector,
-                                     const std::string &sensor_frame,
                                      const std::string &gripping_point_frame)
 {
   if (sensor_frame_.find(end_effector) == sensor_frame_.end())
@@ -25,6 +24,7 @@ bool WrenchManager::setGrippingPoint(const std::string &end_effector,
     return false;
   }
 
+  std::string sensor_frame = sensor_frame_[end_effector];
   geometry_msgs::PoseStamped sensor_to_gripping_point;
   sensor_to_gripping_point.header.frame_id = sensor_frame;
   sensor_to_gripping_point.header.stamp = ros::Time(0);
@@ -84,7 +84,7 @@ bool WrenchManager::initializeWrenchComm(
 
   sensor_frame_[end_effector] = sensor_frame;
   // get rigid transform between sensor frame and arm gripping point
-  if (!setGrippingPoint(end_effector, sensor_frame, gripping_point_frame))
+  if (!setGrippingPoint(end_effector, gripping_point_frame))
   {
     sensor_frame_.erase(end_effector);
     return false;
