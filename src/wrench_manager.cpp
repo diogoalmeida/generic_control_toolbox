@@ -12,7 +12,13 @@ WrenchManager::WrenchManager(ros::NodeHandle nh) : nh_(nh)
   }
 }
 
-WrenchManager::~WrenchManager() {}
+WrenchManager::~WrenchManager()
+{
+  for (auto sub_pair : ft_sub_)
+  {
+    sub_pair.second.shutdown();
+  }
+}
 
 bool WrenchManager::setGrippingPoint(const std::string &end_effector,
                                      const std::string &gripping_point_frame)
