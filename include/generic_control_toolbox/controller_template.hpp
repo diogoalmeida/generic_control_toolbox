@@ -182,12 +182,20 @@ sensor_msgs::JointState ControllerTemplate<
   sensor_msgs::JointState ret = controlAlgorithm(current_state, dt);
   if (action_server_->isActive())
   {
-    action_server_->publishFeedback(feedback_);
+    if (!customDefaultBehavior())
+    {
+      action_server_->publishFeedback(feedback_);
+    }
 
     if (bag_manager_)
     {
       bag_manager_->write(feedback_);  // build log file
     }
+  }
+
+  if (customDefaultBehavior())
+  {
+    action_server_->publishFeedback(feedback_);
   }
 
   if (!customDefaultBehavior() && !action_server_->isActive())
