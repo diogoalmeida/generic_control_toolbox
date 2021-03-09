@@ -140,6 +140,7 @@ bool WrenchManager::wrenchAtGrippingPoint(
   wrench_kdl = sensor_to_gripping_point_.at(end_effector) *
                measured_wrench_.at(end_effector);
   tf::wrenchKDLToEigen(wrench_kdl, wrench);
+  wrench.tail(3) *= -1;
 
   // publish processed wrench to facilitate debugging
   tf::wrenchKDLToMsg(wrench_kdl, temp_wrench.wrench);
