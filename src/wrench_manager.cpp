@@ -150,6 +150,29 @@ bool WrenchManager::wrenchAtGrippingPoint(
   return true;
 }
 
+bool WrenchManager::wrenchAtSensorPointInGraspFrame(
+  const std::string &end_effector, Eigen::Matrix<double, 6, 1> &wrench) const
+{
+  if (sensor_frame_.find(end_effector) == sensor_frame_.end())
+  {
+    return false;
+  }
+
+  KDL::Wrench wrench_kdl;
+  geometry_msgs::WrenchStamped temp_wrench;
+  wrench_kdl = sensor_to_gripping_point_.at(end_effector).M *
+               measured_wrench_.at(end_effector);
+  tf::wrenchKDLToEigen(wrench_kdl, wrench);
+
+  // publish processed wrench to facilitate debugging
+  tf::wrenchKDLToMsg(wrench_kdl, temp_wrench.wrench);
+  temp_wrench.header.frame_id = gripping_frame_.at(end_effector);
+  temp_wrench.header.stamp = ros::Time::now();
+  processed_ft_pub_.at(end_effector).publish(temp_wrench);
+
+  return true;
+}
+
 bool WrenchManager::wrenchAtSensorPoint(
     const std::string &end_effector, Eigen::Matrix<double, 6, 1> &wrench) const
 {
