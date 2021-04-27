@@ -72,6 +72,16 @@ class WrenchManager : public ManagerBase
   bool wrenchAtSensorPoint(const std::string &end_effector,
                            Eigen::Matrix<double, 6, 1> &wrench) const;
 
+  /**
+    Get the sensor measurements, expressed in the gripping point's frame.
+    
+    @param end_effector The arm's end-effector name.
+    @param wrench The wrench at the sensor point.
+    @return False in case of error, true otherwise.
+   **/
+  bool wrenchAtSensorPointInGraspFrame(const std::string &end_effector, 
+                                       Eigen::Matrix<double, 6, 1> &wrench) const;
+
  private:
   int max_tf_attempts_;
   std::map<std::string, std::string> sensor_frame_;
