@@ -5,10 +5,10 @@ namespace generic_control_toolbox
 KDLManager::KDLManager(const std::string &chain_base_link, ros::NodeHandle nh)
     : chain_base_link_(chain_base_link), nh_(nh)
 {
-  if (!model_.initParam("/robot_description"))
+  if (!model_.initParam("robot_description"))
   {
     throw std::runtime_error(
-        "ERROR getting robot description (/robot_description)");
+        "ERROR getting robot description (robot_description)");
   }
 
   getParam();
